@@ -16,7 +16,8 @@
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=0.42
+	ro.mod.version=0.42 \
+	persist.adb.notify=0
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay/common
 
