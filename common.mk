@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-PRODUCT_BRAND ?= shk
-
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
 	ro.mod.version=0.42

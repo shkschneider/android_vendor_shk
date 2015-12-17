@@ -18,8 +18,6 @@
 -->
 <resources>
 
-  <!-- 0 == never, 1 == only when plugged in, 2 == always -->
-  <integer name="def_wifi_sleep_policy">2</integer>
   <bool name="def_networks_available_notification_on">false</bool>
 
   <!-- Development settings -->

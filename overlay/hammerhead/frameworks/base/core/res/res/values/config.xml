@@ -18,13 +18,6 @@
 -->
 <resources>
 
-  <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
-       Software implementation will be used if config_hardware_auto_brightness_available is not set -->
-  <bool name="config_automatic_brightness_available">true</bool>
-
-  <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
-  <bool name="config_unplugTurnsOnScreen">true</bool>
-
   <!-- If true, the screen can be rotated via the accelerometer in all 4
        rotations as the default behavior. -->
   <bool name="config_allowAllRotations">true</bool>
