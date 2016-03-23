@@ -15,4 +15,4 @@
 #
 
 add_lunch_combo shkmod_x86_64-eng
-add_lunch_combo shkmod_hammerhead-userdebug
+add_lunch_combo shkmod_hammerhead-user

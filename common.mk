@@ -15,15 +15,17 @@
 #
 
 PRODUCT_PROPERTY_OVERRIDES += \
-	ro.com.android.dataroaming=false \
 	ro.mod.name=ShkMod \
-	ro.mod.version=0.42 \
+	ro.mod.version=16.03.00 \
+	ro.secure=1 \
+	ro.adb.secure=1 \
 	persist.adb.notify=0
 
 PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
 
-PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay/common
+PRODUCT_PACKAGE_OVERLAYS += \
+	vendor/shk/overlay/common
 
 # EOF
