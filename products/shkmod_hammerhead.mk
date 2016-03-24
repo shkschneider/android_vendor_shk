@@ -13,19 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+$(call inherit-product, device/lge/hammerhead/aosp_hammerhead.mk)
 
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.mod.name=ShkMod \
-	ro.mod.version=16.03.00 \
-	ro.secure=1 \
-	ro.adb.secure=1 \
-	persist.adb.notify=0
+$(call inherit-product, vendor/shk/products/common.mk)
 
-PRODUCT_COPY_FILES += \
-	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
-	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
-
-PRODUCT_PACKAGE_OVERLAYS += \
-	vendor/shk/overlay/common
+PRODUCT_NAME := shkmod_hammerhead
+PRODUCT_DEVICE := hammerhead
+PRODUCT_BRAND := google
+PRODUCT_MODEL := Nexus 5
+PRODUCT_MANUFACTURER := LGE
 
 # EOF

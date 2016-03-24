@@ -13,6 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+$(call inherit-product, build/target/product/full_x86_64.mk)
 
-add_lunch_combo shkmod_emulator-eng
-add_lunch_combo shkmod_hammerhead-user
+$(call inherit-product, vendor/shk/products/common.mk)
+
+PRODUCT_NAME := shkmod_emulator
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	ro.secure=0 \
+	ro.adb.secure=0 \
+	persist.adb.notify=1
+
+# EOF
