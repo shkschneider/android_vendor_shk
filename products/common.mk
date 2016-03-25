@@ -16,8 +16,6 @@
 
 PRODUCT_NAME ?= shkmod
 
-PRODUCT_RESTRICT_VENDOR_FILES := false
-
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
 	ro.mod.version=16.03.00 \
@@ -30,6 +28,7 @@ PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
 
+PRODUCT_RESTRICT_VENDOR_FILES := false
 PRODUCT_PACKAGE_OVERLAYS += \
 	vendor/shk/overlay
 
