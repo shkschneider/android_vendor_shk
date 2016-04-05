@@ -161,7 +161,7 @@ time {
         echo "ui_print(\"\");" >> ${updaterscript}
         echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
         echo "ui_print(\"\");" >> ${updaterscript}
-        echo "show_progress(1.34, 600);" >> ${updaterscript}
+        echo "show_progress(1.34, 750);" >> ${updaterscript}
         unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript}
         [ $? -ne 0 ] && echo -e "\\033[1;31m[ unzip ]\\033[0;0m" >&2 && exit 1
         zip -u ${ota} ${updaterscript} >/dev/null
