@@ -164,8 +164,6 @@ time {
         echo "show_progress(1.34, 600);" >> ${updaterscript}
         unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript}
         [ $? -ne 0 ] && echo -e "\\033[1;31m[ unzip ]\\033[0;0m" >&2 && exit 1
-        sed -i '/install-recovery.sh/d' ${updaterscript}
-        sed -i '/recovery-from-boot.p/d' ${updaterscript}
         zip -u ${ota} ${updaterscript} >/dev/null
         [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
         rm -rf META-INF
@@ -181,22 +179,13 @@ time {
         echo "ro.com.android.mobiledata=true" >> ${buildprop}
         sed -i '/ro.com.android.dataroaming/d' ${buildprop}
         echo "ro.com.android.dataroaming=false" >> ${buildprop}
-        sed -i '/ro.expect.recovery_id/d' ${buildprop}
         sed -i '/^$/d' ${buildprop}
         zip -u ${ota} ${buildprop} >/dev/null
         [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
         rm -f ${buildprop}
         # recovery
         echo     "  recovery"
-        zip -d ${ota} "system/bin/install-recovery.sh" >/dev/null
-        [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
         zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null
-        [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
-        zip -d ${ota} "system/recovery-from-boot.p" >/dev/null
-        [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
-        zip -d ${ota} "recovery/bin/install-recovery.sh" >/dev/null
-        [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
-        zip -d ${ota} "recovery/recovery-from-boot.p" >/dev/null
         [ $? -ne 0 ] && echo -e "\\033[1;31m[ zip ]\\033[0;0m" >&2 && exit 1
         # rom
         mv ${ota} ${rom}
