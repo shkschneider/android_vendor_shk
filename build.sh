@@ -120,7 +120,7 @@ time {
         [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
         sdcard="$out/sdcard.img"
         [ ! -f "$sdcard" ] && mksdcard -l sdcard 1024M ${sdcard}
-        echo "$bd$ok[ source vendor/shk/envsetup.sh && emulator -skin WVGA800 -memory 2014 -gpu on -sysdir $out -sdcard $sdcard ]$rz"
+        echo "$bd$ok[ source vendor/shk/envsetup.sh && ./prebuilts/android-emulator/linux-x86_64/emulator -skin WVGA800 -memory 2014 -gpu on -sysdir $out -sdcard $sdcard ]$rz"
     # else: make dist
     else
         echo "  make dist"
@@ -164,12 +164,6 @@ time {
         [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
         sed -i "s/$user/shkmod/g" ${buildprop}
         sed -i -r 's/(ro.build.host)=.+$/\1=shkmod/' ${buildprop}
-        sed -i '/ro.com.android.gps/d' ${buildprop}
-        echo "ro.com.android.gps=false" >> ${buildprop}
-        sed -i '/ro.com.android.mobiledata/d' ${buildprop}
-        echo "ro.com.android.mobiledata=true" >> ${buildprop}
-        sed -i '/ro.com.android.dataroaming/d' ${buildprop}
-        echo "ro.com.android.dataroaming=false" >> ${buildprop}
         sed -i '/^$/d' ${buildprop}
         zip -u ${ota} ${buildprop} >/dev/null
         [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
