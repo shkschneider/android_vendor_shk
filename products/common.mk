@@ -18,7 +18,7 @@ PRODUCT_NAME ?= shkmod
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=16.03.00 \
+	ro.mod.version=16.04.00 \
 	persist.adb.notify=0
 
 PRODUCT_COPY_FILES += \
