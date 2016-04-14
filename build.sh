@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
+#
+# Copyright 2016 ShkMod
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+id="shkmod"
 
 # colors
 bd=$(tput bold)
@@ -44,8 +61,9 @@ while read t ; do
     fi
 done < <(grep add_lunch_combo vendor/shk/vendorsetup.sh)
 [ $# -eq 0 ] && exit 1
-[ -z "$target" ] && echo "$ko[ target ]$rz" >&2 && exit 1
+
 # lunch if needed
+[ -z "$target" ] && echo "$ko[ target ]$rz" >&2 && exit 1
 if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" ] || [ "$TARGET_PRODUCT-$TARGET_BUILD_VARIANT" != "target" ] ; then
     lunch "$target" >/dev/null 2>&1
     [ $? -ne 0 ] && echo "$ko[ lunch ]$rz" >&2 && exit 1
@@ -162,8 +180,8 @@ time {
         echo "  build.prop"
         unzip -p ${ota} ${buildprop} > ${buildprop}
         [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
-        sed -i "s/$user/shkmod/g" ${buildprop}
-        sed -i -r 's/(ro.build.host)=.+$/\1=shkmod/' ${buildprop}
+        sed -i -r "s/^([^=]+)=(.+)?$user(.+)?/\1=\2$id\3/g" ${buildprop}
+        sed -i -r "s/(ro.build.host)=.+$/\1=$id/" ${buildprop}
         sed -i '/^$/d' ${buildprop}
         zip -u ${ota} ${buildprop} >/dev/null
         [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
