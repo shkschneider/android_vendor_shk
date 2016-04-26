@@ -21,7 +21,7 @@ PRODUCT_NAME := shkmod_emulator
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.secure=0 \
-	ro.adb.secure=0 \
-	persist.adb.notify=1
+	ro.debuggable=1 \
+	ro.adb.secure=0
 
 # EOF

@@ -21,6 +21,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.version=16.04.00 \
 	persist.adb.notify=0
 
+ifeq ($(TARGET_BUILD_VARIANT),user)
+PRODUCT_PROPERTY_OVERRIDES += \
+	ro.adb.secure=1
+endif
+
 PRODUCT_COPY_FILES += \
         vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
 
@@ -29,7 +34,6 @@ PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
 
 PRODUCT_RESTRICT_VENDOR_FILES := false
-PRODUCT_PACKAGE_OVERLAYS += \
-	vendor/shk/overlay
+PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
 
 # EOF
