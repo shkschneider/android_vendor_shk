@@ -152,7 +152,7 @@ time {
         [ $? -ne 0 ] || [ ! -f "$signed" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
         echo "  - $signed"
         echo "  ota_from_target_files"
-        ./build/tools/releasetools/ota_from_target_files ${signed} ${ota} > /dev/null
+        ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null
         [ $? -ne 0 ] || [ ! -f "$ota" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
         echo "  - $ota"
         rm -f ${signed}
@@ -188,8 +188,8 @@ time {
         rm -f ${buildprop}
         # recovery
         echo "  recovery"
+        zip -d ${ota} "system/bin/install-recovery.sh" >/dev/null
         zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null
-        [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
         # rom
         mv ${ota} ${rom}
         [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
