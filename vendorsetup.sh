@@ -15,6 +15,7 @@
 #
 
 add_lunch_combo shkmod_emulator-eng
+add_lunch_combo shkmod_emulator-user
 add_lunch_combo shkmod_hammerhead-user
 
 # EOF

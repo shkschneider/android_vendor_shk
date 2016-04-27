@@ -24,4 +24,17 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.debuggable=1 \
 	ro.adb.secure=0
 
+ifeq ($(TARGET_BUILD_VARIANT),eng)
+PRODUCT_PACKAGES += \
+	Browser \
+	Calendar \
+	Camera2 \
+	Contacts \
+	DeskClock \
+	Email \
+	ExactCalulator \
+	Mms messaging \
+	Music
+endif
+
 # EOF
