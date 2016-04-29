@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+id="shkschneider"
+
 # colors
 bd=$(tput bold)
 ok=$(tput setaf 2)
@@ -61,10 +63,10 @@ cd - >/dev/null
 aosp="https://android.googlesource.com/platform"
 shk="https://github.com/shkschneider/android_"
 conflicts=0
-for p in $(cat "$roomservice" | grep ' remote="shk"' | sed -r 's/^.+ path="([^"]+)".+$/\1/g' | grep -v 'vendor/shk') ; do
+for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | sed -r 's/^.+ path="([^"]+)".+$/\1/g' | grep -v 'vendor/shk') ; do
     echo "- $p"
     [ $info -ne 0 ] && continue
-    branch=$(cat "$roomservice" | grep " path=\"$p\"" | grep ' remote="shk"' | sed -r 's/^.+\srevision="(shk-[a-z]+)".+$/\1/g')
+    branch=$(cat "$roomservice" | grep " path=\"$p\"" | grep ' remote="github"' | grep " name=\"$id/" | sed -r 's/^.+\srevision="(shk-[a-z]+)".+$/\1/g')
     [ -z "$branch" ] && echo "$ko  revision$rz" >&2 && exit 1
     cd "$p"
     [ ! -d ".git" ] && echo "$ko  git$rz" >&2 && exit 1
@@ -77,10 +79,10 @@ for p in $(cat "$roomservice" | grep ' remote="shk"' | sed -r 's/^.+ path="([^"]
         git checkout "$branch" 2>/dev/null >&2
         [ $? -ne 0 ] && echo "$ko  git checkout$rz" >&2 && cd - >/dev/null && continue
     fi
-    # shk remote
-    echo "  remote shk"
-    git remote show shk 2>/dev/null >&2
-    [ $? -ne 0 ] && echo "$ko  git remote: shk$rz" >&2 && cd - >/dev/null && continue
+    # github remote
+    echo "  remote github"
+    git remote show github 2>/dev/null >&2
+    [ $? -ne 0 ] && echo "$ko  git remote: github$rz" >&2 && cd - >/dev/null && continue
     # aosp remote
     echo "  remote aosp"
     git remote show aosp 2>/dev/null >&2
@@ -105,7 +107,7 @@ for p in $(cat "$roomservice" | grep ' remote="shk"' | sed -r 's/^.+ path="([^"]
     # push (if needed)
     if [ "$(git rev-parse HEAD)" != "$commit" ] ; then
         echo "  pushing..."
-        git push shk "$branch"
+        git push github "$branch"
     else
         echo "  up-to-date"
     fi
