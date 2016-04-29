@@ -29,6 +29,7 @@ rz=$(tput sgr0)
 [ -z "$(java -version 2>&1 | grep OpenJDK)" ] && echo "$ko[ OpenJDK ]$rz" >&2 && exit 1
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
 [ ! -f ".repo/manifests/default.xml" ] && echo "$ko[ .repo/manifests/default.xml ]$rz" >&2 && exit 1
+[ ! -f ".repo/local_manifests/roomservice.xml" ] && echo "$ko[ .repo/local_manifests/roomservice.xml ]$rz" >&2 && exit 1
 [ ! -f "build/envsetup.sh" ] && echo "$ko[ build/envsetup.sh ]$rz" >&2 && exit 1
 source build/envsetup.sh >/dev/null
 [ $? -ne 0 ] && echo "$ko[ source ]$rz" >&2 && exit 1
@@ -59,7 +60,7 @@ while read t ; do
         target=$t
         break
     fi
-done < <(grep add_lunch_combo vendor/shk/vendorsetup.sh)
+done < <(egrep '^add_lunch_combo' vendor/shk/vendorsetup.sh)
 [ $# -eq 0 ] && exit 1
 
 # lunch if needed
