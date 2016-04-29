@@ -13,10 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+$(call inherit-product, device/moto/shamu/aosp_shamu.mk)
 
-add_lunch_combo shkmod_emulator-eng
-add_lunch_combo shkmod_emulator-user
-add_lunch_combo shkmod_hammerhead-user
-add_lunch_combo shkmod_shamu-user
+$(call inherit-product, vendor/shk/products/common.mk)
+
+PRODUCT_NAME := shkmod_shamu
+PRODUCT_DEVICE := shamu
+PRODUCT_BRAND := google
+PRODUCT_MODEL := Nexus 6
+PRODUCT_MANUFACTURER := Motorola
+PRODUCT_RESTRICT_VENDOR_FILES := false
+
+PRODUCT_PROPERTY_OVERRIDES += \
+	qemu.sf.lcd_density=493
 
 # EOF
