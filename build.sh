@@ -105,10 +105,10 @@ echo "  Variant: $androidBuildVariant"
 # preparing
 updaterscript="META-INF/com/google/android/updater-script"
 buildprop="system/build.prop"
-signed="signed-${modname}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-ota="ota-${modname}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-rom="rom-${modname}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-stock="stock-${modname}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
+signed="signed-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
+ota="ota-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
+rom="rom-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
+stock="stock-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
 export USE_CCACHE=1
 export CCACHE_DIR=$(pwd)/.ccache
 ./prebuilts/misc/linux-x86/ccache/ccache -M ${androidSdkVersion}G >/dev/null
