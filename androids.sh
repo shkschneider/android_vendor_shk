@@ -14,8 +14,11 @@
 # limitations under the License.
 #
 
-curl -s https://source.android.com/source/build-numbers.html 2>/dev/null \
-    | grep '<td>android-' | sed -r 's;</?td>;;g' | tr -d ' ' | sort -V
+curl -s https://android.googlesource.com/platform/manifest/+refs 2>/dev/null \
+    | sed 's;</li><li;\n;g' \
+    | egrep '"/platform/manifest/\+/android-[0-9\.]+(_r[0-9]+)?"' \
+    | sed -r 's;^.+"/platform/manifest/\+/(android-[0-9\.]+(_r[0-9]+)?)".+$;\1;g' \
+    | sort -V
 
 manifest=".repo/manifests/default.xml"
 [ ! -f "$manifest" ] && exit 0
