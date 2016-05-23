@@ -114,10 +114,10 @@ fi
 [ -z "$USER" ] && echo "$ko[ user ]$rz" >&2 && exit 1
 updaterscript="META-INF/com/google/android/updater-script"
 buildprop="system/build.prop"
-signed="signed-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-ota="ota-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-rom="rom-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-stock="stock-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
+signed="signed-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
+ota="ota-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
+rom="rom-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
+stock="stock-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 if [ -f "./prebuilts/misc/linux-x86/ccache/ccache" ] ; then
     echo "  ccache"
     export USE_CCACHE=1
