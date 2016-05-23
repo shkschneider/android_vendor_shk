@@ -71,8 +71,6 @@ if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" ] || [ "$TARGET_PRODUCT-$TARGET_B
 fi
 
 # summary
-user=$(whoami 2>/dev/null)
-[ -z "$user" ] && echo "$ko[ user ]$rz" >&2 && exit 1
 androidRevision=$(cat .repo/manifests/default.xml | egrep 'default\s+revision' | cut -d'"' -f2 | sed 's#refs/tags/##')
 [ -z "$androidRevision" ] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
 androidVersion=$(grep "PLATFORM_VERSION :=" build/core/version_defaults.mk | awk '{print $NF}')
@@ -101,110 +99,124 @@ echo "  SecurityPatch: $androidSecurityPatch"
 echo "$bd[ Target: $target ]$rz"
 echo "  Device: $device"
 echo "  Variant: $androidBuildVariant"
+
 [ $info -eq 1 ] && exit 0
+T=$(date +%s)
 
 # preparing
+echo "$bd[ Preparing... ]$rz"
+if [ -n "$id" ] ; then
+    echo "  user"
+    export USER="$id"
+    echo "  host"
+    export HOST="$id"
+fi
+[ -z "$USER" ] && echo "$ko[ user ]$rz" >&2 && exit 1
 updaterscript="META-INF/com/google/android/updater-script"
 buildprop="system/build.prop"
 signed="signed-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
 ota="ota-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
 rom="rom-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
 stock="stock-${modname}-${device}-${modversion}-android-${androidVersion}-${androidBuildId}.zip"
-export USE_CCACHE=1
-export CCACHE_DIR=$(pwd)/.ccache
-./prebuilts/misc/linux-x86/ccache/ccache -M ${androidSdkVersion}G >/dev/null
-[ $? -ne 0 ] && echo "$ko[ ccache ]$rz" >&2 && exit 1
+if [ -f "./prebuilts/misc/linux-x86/ccache/ccache" ] ; then
+    echo "  ccache"
+    export USE_CCACHE=1
+    export CCACHE_DIR=$(pwd)/.ccache
+    ./prebuilts/misc/linux-x86/ccache/ccache -M ${androidSdkVersion}G >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ ccache ]$rz" >&2 && exit 1
+fi
+echo "  ulimit"
 ulimit -S -n 1024
 out=$(echo $ANDROID_PRODUCT_OUT | sed -r "s#^$(pwd)/##")
-
-# cooking
-TIMEFORMAT="Done in %R seconds, using %P of ($(egrep '^processor' /proc/cpuinfo | wc -l)) CPU resources."
-time {
-    echo "$bd[ Cleaning... ]$rz"
-    [ -d "META-INF" ] && rm -rf META-INF
-    [ -d "$buildprop" ] && rm -f ${buildprop}
-    [ -f "$signed" ] && rm -f ${signed}
-    [ -f "$ota" ] && rm -f ${ota}
-    [ -f "$rom" ] && rm -f ${rom}
-    [ -f "$stock" ] && rm -f ${stock}
-    echo "  make installclean"
-    make -j installclean >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ make ]$rz" >&2 && exit 1
-    echo "$bd[ Building... ]$rz"
-    # emulator: make droid
-    if [ "$device" = "emulator" ] ; then
-        echo "  make droid"
-        make -j droid >/dev/null
-        [ $? -ne 0 ] && echo "$ko[ make ]$rz" >&2 && exit 1
-        [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
-        sdcard="$out/sdcard.img"
-        [ ! -f "$sdcard" ] && mksdcard -l sdcard 1024M ${sdcard}
-        echo "$bd$ok[ source vendor/shk/envsetup.sh && ./prebuilts/android-emulator/linux-x86_64/emulator -skin WVGA800 -memory 2014 -gpu on -sysdir $out -sdcard $sdcard ]$rz"
+# cleaning
+echo "$bd[ Cleaning... ]$rz"
+[ -d "META-INF" ] && rm -rf META-INF
+[ -d "$buildprop" ] && rm -f ${buildprop}
+[ -f "$signed" ] && rm -f ${signed}
+[ -f "$ota" ] && rm -f ${ota}
+[ -f "$rom" ] && rm -f ${rom}
+[ -f "$stock" ] && rm -f ${stock}
+echo "  make installclean"
+make -j installclean >/dev/null
+[ $? -ne 0 ] && echo "$ko[ make installclean ]$rz" >&2 && exit 1
+echo "$bd[ Building... ]$rz"
+# emulator: make droid
+if [ "$device" = "emulator" ] ; then
+    echo "  make droid"
+    make -j droid >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ make droid ]$rz" >&2 && exit 1
+    [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
+    sdcard="$out/sdcard.img"
+    [ ! -f "$sdcard" ] && mksdcard -l sdcard 1024M ${sdcard}
+    echo "$bd$ok[ source vendor/shk/envsetup.sh && ./prebuilts/android-emulator/linux-x86_64/emulator -skin WVGA800 -memory 2014 -gpu on -sysdir $out -sdcard $sdcard ]$rz"
     # else: make dist
-    else
-        echo "  make dist"
-        make -j dist >/dev/null
-        [ $? -ne 0 ] && echo "$ko[ make ]$rz" >&2 && exit 1
-        [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
-        echo "$bd[ Assembling... ]$rz"
-        echo "  sign_target_files_apks"
-        dist="$(echo $out | sed -r "s#target/product/$device\$##")dist"
-        ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${user}.zip ${signed} >/dev/null
-        [ $? -ne 0 ] || [ ! -f "$signed" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
-        echo "  - $signed"
-        echo "  ota_from_target_files"
-        ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null
-        [ $? -ne 0 ] || [ ! -f "$ota" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
-        echo "  - $ota"
-        rm -f ${signed}
-        echo "$bd[ Finalizing... ]$rz"
-        # updater-script
-        echo "  updater-script"
-        mkdir -p $(dirname ${updaterscript}) >/dev/null
-        rm -f ${updaterscript}
-        echo "ui_print(\"  _________.__     __      _____             .___\");" >> ${updaterscript}
-        echo "ui_print(\" /   _____/|  |__ |  | __ /     \\   ____   __| _/\");" >> ${updaterscript}
-        echo "ui_print(\" \\_____  \\ |  |  \\|  |/ //  \\ /  \\ /  _ \\ / __ | \");" >> ${updaterscript}
-        echo "ui_print(\" /        \\|   Y  \\    </    Y    (  <_> ) /_/ | \");" >> ${updaterscript}
-        echo "ui_print(\"/_______  /|___|  /__|_ \\____|__  /\\____/\\____ | \");" >> ${updaterscript}
-        echo "ui_print(\"        \\/      \\/     \\/       \\/            \\/ \");" >> ${updaterscript}
-        echo "ui_print(\"\");" >> ${updaterscript}
-        echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
-        echo "ui_print(\"\");" >> ${updaterscript}
-        echo "show_progress(1.34, 750);" >> ${updaterscript}
-        unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript}
-        [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
-        zip -u ${ota} ${updaterscript} >/dev/null
-        [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
-        rm -rf META-INF
-        # build.prop
-        echo "  build.prop"
-        unzip -p ${ota} ${buildprop} > ${buildprop}
-        [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
-        sed -i -r "s/^([^=]+)=(.+)?$user(.+)?/\1=\2$id\3/g" ${buildprop}
-        sed -i -r "s/(ro.build.host)=.+$/\1=$id/" ${buildprop}
-        sed -i '/^$/d' ${buildprop}
-        zip -u ${ota} ${buildprop} >/dev/null
-        [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
-        rm -f ${buildprop}
-        # recovery
-        echo "  recovery"
-        zip -d ${ota} "system/bin/install-recovery.sh" >/dev/null
-        zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null
-        # rom
-        mv ${ota} ${rom}
-        [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
-        echo "$bd$ok[ $rom   $(md5sum "$rom" | awk '{print $1}') ]$rz"
-        factory="$dist/$TARGET_PRODUCT-img-eng.$user.zip"
-        if [ -f "$factory" ] ; then
-            mv ${factory} ${stock}
-            echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
+else
+    echo "  make dist"
+    make -j dist >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ make dist ]$rz" >&2 && exit 1
+    [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
+    echo "$bd[ Assembling... ]$rz"
+    # sign_target_files_apks
+    echo "  sign_target_files_apks"
+    [ ! -f "./build/tools/releasetools/sign_target_files_apks" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
+    dist="$(echo $out | sed -r "s#target/product/$device\$##")dist"
+    ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null
+    [ $? -ne 0 ] || [ ! -f "$signed" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
+    echo "  - $signed"
+    # ota_from_target_files
+    echo "  ota_from_target_files"
+    [ ! -f "./build/tools/releasetools/ota_from_target_files" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
+    ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null
+    [ $? -ne 0 ] || [ ! -f "$ota" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
+    echo "  - $ota"
+    rm -f ${signed}
+    echo "$bd[ Finalizing... ]$rz"
+    # updater-script
+    echo "  updater-script"
+    mkdir -p $(dirname ${updaterscript}) >/dev/null
+    rm -f ${updaterscript}
+    echo "ui_print(\"  _________.__     __      _____             .___\");" >> ${updaterscript}
+    echo "ui_print(\" /   _____/|  |__ |  | __ /     \\   ____   __| _/\");" >> ${updaterscript}
+    echo "ui_print(\" \\_____  \\ |  |  \\|  |/ //  \\ /  \\ /  _ \\ / __ | \");" >> ${updaterscript}
+    echo "ui_print(\" /        \\|   Y  \\    </    Y    (  <_> ) /_/ | \");" >> ${updaterscript}
+    echo "ui_print(\"/_______  /|___|  /__|_ \\____|__  /\\____/\\____ | \");" >> ${updaterscript}
+    echo "ui_print(\"        \\/      \\/     \\/       \\/            \\/ \");" >> ${updaterscript}
+    echo "ui_print(\"\");" >> ${updaterscript}
+    echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
+    echo "ui_print(\"\");" >> ${updaterscript}
+    echo "show_progress(1.34, 750);" >> ${updaterscript}
+    unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript}
+    [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
+    zip -u ${ota} ${updaterscript} >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    rm -rf META-INF
+    # build.prop
+    echo "  build.prop"
+    unzip -p ${ota} ${buildprop} > ${buildprop}
+    [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
+    sed -i '/^$/d' ${buildprop}
+    zip -u ${ota} ${buildprop} >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    rm -f ${buildprop}
+    # recovery
+    echo "  recovery"
+    zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null
+    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    # rom
+    mv ${ota} ${rom}
+    [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
+    echo "$bd$ok[ $rom   $(md5sum "$rom" | awk '{print $1}') ]$rz"
+    factory="$dist/${TARGET_PRODUCT}-img-eng.${USER}.zip"
+    if [ -f "$factory" ] ; then
+        mv ${factory} ${stock}
+        echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
         fi
-        # root?
-        # gapps
-        echo "  http://opengapps.org"
-    fi
-}
+    # root?
+    # gapps
+    echo "  http://opengapps.org"
+fi
+T=$(($(date +%s) - $T))
+printf "Done in %02d:%02d:%02d with %d CPUs\n" "$((T/3600%24))" "$((T/60%60))" "$((T%60))" "$(nproc)"
 
 exit 0
 
