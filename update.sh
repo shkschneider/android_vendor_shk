@@ -39,7 +39,8 @@ while getopts ":i" opt ; do
 done
 shift $((OPTIND - 1))
 ref="$1"
-[ -z "$ref" ] && echo "$ko[ ref ]$rz" && exit 1
+[ -z "$ref" ] && echo "$ko[ ref ]$rz" >&2 && exit 1
+[ -z "$(echo "$ref" | egrep 'android-[0-9\.]+(_.+)?')" ] && echo "$ko[ ref ]$rz" >&2 && exit 1
 echo "$bd[ $ref ]$rz"
 
 # default.xml
@@ -50,7 +51,18 @@ git diff --exit-code -- default.xml 2>/dev/null >&2
 cd - >/dev/null
 c=$(basename $(cat "$default" | egrep 'default\s+revision' | cut -d'"' -f2))
 [ -z "$c" ] && echo "$ko[ default revision ]$rz" >&2 && exit 1
-[ "$c" != "$ref" ] && echo "$wn  $ref -> $c$rz" >&2
+if [ "$c" != "$ref" ] ; then
+    echo "$wn  $default: $r$rz" >&2
+    cd ".repo/manifests"
+    r=$(git ls-remote --heads 2>/dev/null | grep "refs/heads/$ref" | wc -l)
+    [ $r -eq 0 ] && echo "$wn  git ls-remote$rz" >&2 && exit 1
+    git checkout "$ref" >/dev/null 2>&1
+    [ $? -ne 0 ] && echo "$wn  git checkout$rz" >&2 && exit 1
+    git pull >/dev/null 2>&1
+    [ $? -ne 0 ] && echo "$wn  git pull$rz" >&2 && exit 1
+    echo "  $default: $ref" >&2
+    cd - >/dev/null
+fi
 
 # roomservice.xml
 [ ! -f "$roomservice" ] && echo "$ko[ $roomservice ]$rz" >&2 && exit 1
@@ -107,7 +119,7 @@ for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | 
     # push (if needed)
     if [ "$(git rev-parse HEAD)" != "$commit" ] ; then
         echo "  pushing..."
-        git push github "$branch"
+        git push github "$branch" >/dev/null
     else
         echo "  up-to-date"
     fi
