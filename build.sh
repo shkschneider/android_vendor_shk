@@ -15,7 +15,9 @@
 # limitations under the License.
 #
 
-id="shkmod"
+[ ! -f "vendor/shk/products/common.mk" ] && echo "$ko[ vendor/shk/products/common.mk ]$rz" >&2 && exit 1
+id=$(egrep '^\s*PRODUCT_NAME' "vendor/shk/products/common.mk" 2>/dev/null | cut -d'#' -f1 | awk '{print $NF}')
+id=${id:-"shkmod"}
 
 # colors
 bd=$(tput bold)
@@ -25,6 +27,8 @@ ko=$(tput setaf 1)
 rz=$(tput sgr0)
 
 # general checks
+[ ! -f "/proc/cpuinfo" ] && echo "$ko[ /proc/cpuinfo ]$rz" >&2 && exit 1
+[ -z "$(egrep '^flags\s*:' /proc/cpuinfo 2>/dev/null | head -1 | grep -w 'lm')" ] && echo "$ko[ 64bits ]$rz" >&2 && exit 1
 [ -z "$(which java)" ] && echo "$ko[ java ]$rz" >&2 && exit 1
 [ -z "$(java -version 2>&1 | grep OpenJDK)" ] && echo "$ko[ OpenJDK ]$rz" >&2 && exit 1
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
@@ -60,7 +64,7 @@ while read t ; do
         target=$t
         break
     fi
-done < <(egrep '^add_lunch_combo' vendor/shk/vendorsetup.sh)
+done < <(egrep '^add_lunch_combo\s.' vendor/shk/vendorsetup.sh)
 [ $# -eq 0 ] && exit 1
 
 # lunch if needed
@@ -71,23 +75,23 @@ if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" ] || [ "$TARGET_PRODUCT-$TARGET_B
 fi
 
 # summary
-androidRevision=$(cat .repo/manifests/default.xml | egrep 'default\s+revision' | cut -d'"' -f2 | sed 's#refs/tags/##')
+androidRevision=$(egrep 'default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's#refs/tags/##')
 [ -z "$androidRevision" ] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
-androidVersion=$(grep "PLATFORM_VERSION :=" build/core/version_defaults.mk | awk '{print $NF}')
+androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
 [ -z "$androidVersion" ] && echo "$ko[ androidVersion ]$rz" >&2 && exit 1
-androidSdkVersion=$(grep "PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk | awk '{print $NF}')
+androidSdkVersion=$(egrep "^\s*PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
 [ -z "$androidSdkVersion" ] && echo "$ko[ androidSdkVersion ]$rz" >&2 && exit 1
-androidBuildId=$(grep "BUILD_ID=" build/core/build_id.mk | cut -d'=' -f2)
+androidBuildId=$(egrep "^(export\s)?\s*BUILD_ID=" build/core/build_id.mk 2>/dev/null | cut -d'=' -f2)
 [ -z "$androidBuildId" ] && echo "$ko[ androidBuildId ]$rz" >&2 && exit 1
-androidSecurityPatch=$(grep "PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk | awk '{print $NF}')
+androidSecurityPatch=$(egrep "^\s*PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
 [ -z "$androidSecurityPatch" ] && echo "$ko[ androidSecurityPatch ]$rz" >&2 && exit 1
 androidBuildVariant=$(echo "$TARGET_BUILD_VARIANT" | cut -d'=' -f2)
 [ -z "$androidBuildVariant" ] && echo "$ko[ androidBuildVariant ]$rz" >&2 && exit 1
 device=$(echo "$TARGET_PRODUCT" | cut -d'_' -f2-)
 [ -z "$device" ] && echo "$ko[ device ]$rz" >&2 && exit 1
-modname=$(grep "ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
+modname=$(egrep "^\s*ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
 [ -z "$modname" ] && echo "$ko[ modname ]$rz" >&2 && exit 1
-modversion=$(grep "ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
+modversion=$(egrep "^\s*ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
 [ -z "$modversion" ] && echo "$ko[ modversion ]$rz" >&2 && exit 1
 echo "$bd[ $modname $modversion ]$rz"
 modname=$(echo "$modname" | tr '[A-Z]' '[a-z]')
@@ -146,10 +150,10 @@ if [ "$device" = "emulator" ] ; then
     make -j droid >/dev/null
     [ $? -ne 0 ] && echo "$ko[ make droid ]$rz" >&2 && exit 1
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
-    sdcard="$out/sdcard.img"
-    [ ! -f "$sdcard" ] && mksdcard -l sdcard 1024M ${sdcard}
-    echo "$bd$ok[ source vendor/shk/envsetup.sh && ./prebuilts/android-emulator/linux-x86_64/emulator -skin WVGA800 -memory 2014 -gpu on -sysdir $out -sdcard $sdcard ]$rz"
-    # else: make dist
+    [ ! -f "$out/sdcard.img" ] && mksdcard -l sdcard 1024M "$out/sdcard.img" 2>/dev/null
+    # development/tools/emulator/skins
+    echo "$bd$ok[ source vendor/shk/envsetup.sh && emulator -skin WVGA800 -gpu on -sysdir \$ANDROID_PRODUCT_OUT ]$rz"
+# else: make dist
 else
     echo "  make dist"
     make -j dist >/dev/null
