@@ -18,6 +18,7 @@ $(call inherit-product, build/target/product/full_x86_64.mk)
 $(call inherit-product, vendor/shk/products/common.mk)
 
 PRODUCT_NAME := shkmod_emulator
+PRODUCT_MODEL := Emulator
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.secure=0 \
