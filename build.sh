@@ -28,17 +28,21 @@ rz=$(tput sgr0)
 
 # general checks
 [ ! -f "/proc/cpuinfo" ] && echo "$ko[ /proc/cpuinfo ]$rz" >&2 && exit 1
-[ -z "$(egrep '^flags\s*:' /proc/cpuinfo 2>/dev/null | head -1 | grep -w 'lm')" ] && echo "$ko[ 64bits ]$rz" >&2 && exit 1
+egrep '^flags\s*:' "/proc/cpuinfo" 2>/dev/null | head -1 | grep -w 'lm' >/dev/null || {
+    echo "$ko[ 64bits ]$rz" >&2 && exit 1
+}
 [ -z "$(which java)" ] && echo "$ko[ java ]$rz" >&2 && exit 1
 [ -z "$(java -version 2>&1 | grep OpenJDK)" ] && echo "$ko[ OpenJDK ]$rz" >&2 && exit 1
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
 [ ! -f ".repo/manifests/default.xml" ] && echo "$ko[ .repo/manifests/default.xml ]$rz" >&2 && exit 1
 [ ! -f ".repo/local_manifests/roomservice.xml" ] && echo "$ko[ .repo/local_manifests/roomservice.xml ]$rz" >&2 && exit 1
 [ ! -f "build/envsetup.sh" ] && echo "$ko[ build/envsetup.sh ]$rz" >&2 && exit 1
-source build/envsetup.sh >/dev/null
-[ $? -ne 0 ] && echo "$ko[ source ]$rz" >&2 && exit 1
-croot
-[ $? -ne 0 ] && echo "$ko[ croot ]$rz" >&2 && exit 1
+source build/envsetup.sh >/dev/null || {
+    echo "$ko[ source ]$rz" >&2 && exit 1
+}
+croot || {
+    echo "$ko[ croot ]$rz" >&2 && exit 1
+}
 
 # arguments parsing
 info=0
@@ -69,9 +73,10 @@ done < <(egrep '^add_lunch_combo\s.' vendor/shk/vendorsetup.sh)
 
 # lunch if needed
 [ -z "$target" ] && echo "$ko[ target ]$rz" >&2 && exit 1
-if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" ] || [ "$TARGET_PRODUCT-$TARGET_BUILD_VARIANT" != "target" ] ; then
-    lunch "$target" >/dev/null 2>&1
-    [ $? -ne 0 ] && echo "$ko[ lunch ]$rz" >&2 && exit 1
+if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" -o "$TARGET_PRODUCT-$TARGET_BUILD_VARIANT" != "target" ] ; then
+    lunch "$target" >/dev/null 2>&1 || {
+        echo "$ko[ lunch ]$rz" >&2 && exit 1
+    }
 fi
 
 # summary
@@ -122,12 +127,14 @@ signed="signed-${modname}-${modversion}-${device}-android-${androidVersion}-${an
 ota="ota-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 rom="rom-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 stock="stock-${modname}-${modversion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
-if [ -f "./prebuilts/misc/linux-x86/ccache/ccache" ] ; then
+ccache="./prebuilts/misc/$(uname -s | tr "[A-Z]" "[a-z]")-x86/ccache/ccache"
+if [ -f "$ccache" ] ; then
     echo "  ccache"
     export USE_CCACHE=1
     export CCACHE_DIR=$(pwd)/.ccache
-    ./prebuilts/misc/linux-x86/ccache/ccache -M ${androidSdkVersion}G >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ ccache ]$rz" >&2 && exit 1
+    $ccache -M ${androidSdkVersion}G >/dev/null || {
+        echo "$ko[ ccache ]$rz" >&2 && exit 1
+    }
 fi
 echo "  ulimit"
 ulimit -S -n 1024
@@ -141,14 +148,16 @@ echo "$bd[ Cleaning... ]$rz"
 [ -f "$rom" ] && rm -f ${rom}
 [ -f "$stock" ] && rm -f ${stock}
 echo "  make installclean"
-make -j installclean >/dev/null
-[ $? -ne 0 ] && echo "$ko[ make installclean ]$rz" >&2 && exit 1
+make -j installclean >/dev/null || {
+    echo "$ko[ make installclean ]$rz" >&2 && exit 1
+}
 echo "$bd[ Building... ]$rz"
 # emulator: make droid
 if [ "$device" = "emulator" ] ; then
     echo "  make droid"
-    make -j droid >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ make droid ]$rz" >&2 && exit 1
+    make -j droid >/dev/null || {
+        echo "$ko[ make droid ]$rz" >&2 && exit 1
+    }
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     [ ! -f "$out/sdcard.img" ] && mksdcard -l sdcard 1024M "$out/sdcard.img" 2>/dev/null
     # development/tools/emulator/skins
@@ -156,22 +165,27 @@ if [ "$device" = "emulator" ] ; then
 # else: make dist
 else
     echo "  make dist"
-    make -j dist >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ make dist ]$rz" >&2 && exit 1
+    make -j dist >/dev/null || {
+        echo "$ko[ make dist ]$rz" >&2 && exit 1
+    }
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     echo "$bd[ Assembling... ]$rz"
     # sign_target_files_apks
     echo "  sign_target_files_apks"
     [ ! -f "./build/tools/releasetools/sign_target_files_apks" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
     dist="$(echo $out | sed -r "s#target/product/$device\$##")dist"
-    ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null
-    [ $? -ne 0 ] || [ ! -f "$signed" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
+    ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null || {
+        echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
+    }
+    [ ! -f "$signed" ] && echo "$ko[ $signed ]$rz" >&2 && exit 1
     echo "  - $signed"
     # ota_from_target_files
     echo "  ota_from_target_files"
     [ ! -f "./build/tools/releasetools/ota_from_target_files" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
-    ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null
-    [ $? -ne 0 ] || [ ! -f "$ota" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
+    ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null || {
+        echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
+    }
+    [ ! -f "$ota" ] && echo "$ko[ $ota ]$rz" >&2 && exit 1
     echo "  - $ota"
     rm -f ${signed}
     echo "$bd[ Finalizing... ]$rz"
@@ -189,23 +203,28 @@ else
     echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
     echo "ui_print(\"\");" >> ${updaterscript}
     echo "show_progress(1.34, 750);" >> ${updaterscript}
-    unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript}
-    [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
-    zip -u ${ota} ${updaterscript} >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript} || {
+        echo "$ko[ unzip ]$rz" >&2 && exit 1
+    }
+    zip -u ${ota} ${updaterscript} >/dev/null || {
+        echo "$ko[ zip ]$rz" >&2 && exit 1
+    }
     rm -rf META-INF
     # build.prop
     echo "  build.prop"
-    unzip -p ${ota} ${buildprop} > ${buildprop}
-    [ $? -ne 0 ] && echo "$ko[ unzip ]$rz" >&2 && exit 1
+    unzip -p ${ota} ${buildprop} > ${buildprop} || {
+        echo "$ko[ unzip ]$rz" >&2 && exit 1
+    }
     sed -i '/^$/d' ${buildprop}
-    zip -u ${ota} ${buildprop} >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    zip -u ${ota} ${buildprop} >/dev/null || {
+        echo "$ko[ zip ]$rz" >&2 && exit 1
+    }
     rm -f ${buildprop}
     # recovery
     echo "  recovery"
-    zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null
-    [ $? -ne 0 ] && echo "$ko[ zip ]$rz" >&2 && exit 1
+    zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null || {
+        echo "$ko[ zip ]$rz" >&2 && exit 1
+    }
     # rom
     mv ${ota} ${rom}
     [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
@@ -214,7 +233,7 @@ else
     if [ -f "$factory" ] ; then
         mv ${factory} ${stock}
         echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
-        fi
+    fi
     # root?
     # gapps
     echo "  http://opengapps.org"

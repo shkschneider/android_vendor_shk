@@ -5,7 +5,7 @@
 export ANDROID_BUILD_TOP=$(pwd)
 export ANDROID_PRODUCT_OUT=$ANDROID_BUILD_TOP/out/target/product/generic_x86_64
 
-emulator="$ANDROID_BUILD_TOP/prebuilts/android-emulator/$(echo "$(uname -s | tr "[A-Z]" "[a-z]")-$(uname -m)")/emulator"
+emulator="$ANDROID_BUILD_TOP/prebuilts/android-emulator/$(echo "$(uname -s | tr "[A-Z]" "[a-z]")-x86_64")/emulator"
 [ ! -f "$emulator" ] && echo "$ko[ $emulator ]$rz" >&2 && return 1
 emulator="$(dirname "$emulator")"
 # http://superuser.com/a/39995
