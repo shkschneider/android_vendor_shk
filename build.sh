@@ -161,7 +161,7 @@ if [ "$device" = "emulator" ] ; then
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     [ ! -f "$out/sdcard.img" ] && mksdcard -l sdcard 1024M "$out/sdcard.img" 2>/dev/null
     # skins (even scales if necessary)
-    skin="development/tools/emulator/skins/WXGA720" # xhdpi normal (1280x720)
+    skin="vendor/shk/skins/hammerhead" # "development/tools/emulator/skins/WXGA720"
     scale=100
     command -v xrandr >/dev/null 2>&1 && {
         if [ ! -d "$skin" ] ; then
