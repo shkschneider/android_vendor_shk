@@ -169,15 +169,21 @@ if [ "$device" = "emulator" ] ; then
         elif [ ! -f "$skin/layout" ] ; then
             echo "$wn[ $skin/layout ]$rz" >&2
         else
-            scale=10
             l=$(egrep 'height\s+[0-9]+' "$skin/layout" | awk '{print $NF}' | sort -rn | head -1)
             h=$(xrandr -q | egrep 'primary' | sed -r 's;^.+[0-9]+x([0-9]+)[^0-9].+$;\1;')
-            s=$(($(($l / 100)) * $scale))
-            while [ $scale -le 100 ] ; do
-                s=$(($(($l / 100)) * $(($scale + 10))))
-                [ $s -ge $h ] && break
-                scale=$(($scale + 10))
-            done
+            if [ -z "$l" -o -n "$(echo "$l" | tr -d '[^0-9]')" ] ; then
+                echo "$wn[ $skin/layout ]$rz" >&2
+            elif [ -z "$h" -o -n "$(echo "$h" | tr -d '[^0-9]')" ] ; then
+                echo "$wn[ xrandr ]$rz" >&2
+            else
+                scale=10
+                s=$(($(($l / 100)) * $scale))
+                while [ $scale -le 100 ] ; do
+                    s=$(($(($l / 100)) * $(($scale + 10))))
+                    [ $s -ge $h ] && break
+                    scale=$(($scale + 10))
+                done
+            fi
         fi
     } || {
         [ ! -d "$skin"  ] && echo "$wn[ $skin ]$rz" >&2 ; [ ! -f "$skin/layout"  ] && echo "$wn[ $skin/layout ]$rz" >&2
