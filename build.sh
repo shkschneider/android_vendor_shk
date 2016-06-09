@@ -46,9 +46,11 @@ croot \
 
 # arguments parsing
 info=0
-while getopts ":i" opt ; do
+clean=0
+while getopts ":ic" opt ; do
     case $opt in
         i) info=1 ;;
+        c) clean=1 ;;
         # allows no other option
         \?) echo "$ko[ -$OPTARG ]$rz" >&2 && exit 1 ;;
     esac
@@ -109,6 +111,7 @@ echo "  Device: $device"
 echo "  Variant: $androidBuildVariant"
 
 [ $info -eq 1 ] && exit 0
+unset info
 T=$(date +%s)
 
 # preparing
@@ -136,23 +139,30 @@ if [ -f "$ccache" ] ; then
 else
     echo "$wn[ ccache ]$rz" >&2
 fi
+unset ccache
 echo "  ulimit"
 ulimit -S -n 1024 || echo "$wn[ ulimit ]$rz" >&2
 out=$(echo $ANDROID_PRODUCT_OUT | sed -r "s;^$(pwd)/;;")
 
 # cleaning
+[ "$androidBuildVariant" != "eng" ] && clean=1
 echo "$bd[ Cleaning... ]$rz"
 [ -d "META-INF" ] && rm -rf META-INF
 [ -d "$buildprop" ] && rm -f ${buildprop}
+echo "  *.zip"
 [ -f "$signed" ] && rm -f ${signed}
 [ -f "$ota" ] && rm -f ${ota}
 [ -f "$rom" ] && rm -f ${rom}
 [ -f "$stock" ] && rm -f ${stock}
-echo "  make installclean"
-make -j installclean >/dev/null \
-    || { echo "$ko[ make installclean ]$rz" >&2 && exit 1 ; }
-echo "$bd[ Building... ]$rz"
+echo "  *.img"
+rm -f "$out/*.img" 2>/dev/null
+if [ $clean -eq 1 ] ; then
+    echo "  make installclean"
+    make -j installclean >/dev/null \
+        || { echo "$ko[ make installclean ]$rz" >&2 && exit 1 ; }
+fi
 
+echo "$bd[ Building... ]$rz"
 # emulator: make droid
 if [ "$device" = "emulator" ] ; then
     echo "  make droid"
@@ -161,7 +171,7 @@ if [ "$device" = "emulator" ] ; then
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     [ ! -f "$out/sdcard.img" ] && mksdcard -l sdcard 1024M "$out/sdcard.img" 2>/dev/null
     # skins (even scales if necessary)
-    skin="vendor/shk/skins/hammerhead" # "development/tools/emulator/skins/WXGA720"
+    skin="vendor/shk/skins/hammerhead"
     scale=100
     command -v xrandr >/dev/null 2>&1 && {
         if [ ! -d "$skin" ] ; then
@@ -182,16 +192,17 @@ if [ "$device" = "emulator" ] ; then
                     [ $height -ge $screenHeight ] && break
                 done
             fi
+            unset layoutHeight screenHeight
         fi
     } || {
         [ ! -d "$skin"  ] && echo "$wn[ $skin ]$rz" >&2 ; [ ! -f "$skin/layout"  ] && echo "$wn[ $skin/layout ]$rz" >&2
     }
     scale=$(echo "scale=2; $scale/100" | bc -ql)
     # harware acceleration <http://tools.android.com/tech-docs/emulator>
-    gpu="off"
-    egrep '^flags\s*:' "/proc/cpuinfo" 2>/dev/null | head -1 | egrep -w '(vmx|svm)' >/dev/null \
-        && { gpu="on" ; }
+    gpu=$(egrep '^flags\s*:' "/proc/cpuinfo" 2>/dev/null | head -1 | egrep -w '(vmx|svm)' >/dev/null && echo "on")
+    gpu=${gpu:-"off"}
     echo "$bd$ok[ source vendor/shk/envsetup.sh && emulator -skindir $(dirname "$skin") -skin $(basename "$skin") -scale $scale -gpu $gpu -sysdir \$ANDROID_PRODUCT_OUT ]$rz"
+    unset skin scale gpu
 
 # else: make dist
 else
@@ -207,6 +218,7 @@ else
     ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null \
         || { echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1 ; }
     [ ! -f "$signed" ] && echo "$ko[ $signed ]$rz" >&2 && exit 1
+    unset dist
     echo "  - $signed"
     # ota_from_target_files
     echo "  ota_from_target_files"
@@ -214,8 +226,9 @@ else
     ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null \
         || { echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1 ; }
     [ ! -f "$ota" ] && echo "$ko[ $ota ]$rz" >&2 && exit 1
-    echo "  - $ota"
     rm -f ${signed}
+    unset signed
+    echo "  - $ota"
     echo "$bd[ Finalizing... ]$rz"
     # updater-script
     echo "  updater-script"
@@ -236,6 +249,7 @@ else
     zip -u ${ota} ${updaterscript} >/dev/null \
         || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
     rm -rf META-INF
+    unset updaterscript
     # build.prop
     echo "  build.prop"
     unzip -p ${ota} ${buildprop} > ${buildprop} \
@@ -244,12 +258,14 @@ else
     zip -u ${ota} ${buildprop} >/dev/null \
         || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
     rm -f ${buildprop}
+    unset buildprop
     # recovery
     echo "  recovery"
     zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null \
         || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
     # rom
     mv ${ota} ${rom}
+    unset ota
     [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
     echo "$bd$ok[ $rom   $(md5sum "$rom" | awk '{print $1}') ]$rz"
     factory="$dist/${TARGET_PRODUCT}-img-eng.${USER}.zip"
@@ -257,6 +273,7 @@ else
         mv ${factory} ${stock}
         echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
     fi
+    unset factory stock rom
     # root?
     # gapps
     echo "  http://opengapps.org"
