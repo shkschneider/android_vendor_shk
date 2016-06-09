@@ -74,7 +74,7 @@ done < <(egrep '^add_lunch_combo\s+[a-z]+_[a-z_0-9]+\-[a-z]+' vendor/shk/vendors
 [ $# -eq 0 ] && exit 1
 
 # lunch if needed
-[[ ! $target =~ ^[a-z]+_[a-z_0-9]+\-[a-z]+$ ]] && echo "$ko[ target ]$rz" >&2 && exit 1
+[[ ! $target =~ ^([a-z]+_)?[a-z0-9][a-z_0-9]*[a-z0-9]\-(eng|userdebug|user)$ ]] && echo "$ko[ target ]$rz" >&2 && exit 1
 if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" -o "$TARGET_PRODUCT-$TARGET_BUILD_VARIANT" != "target" ] ; then
     lunch "$target" >/dev/null 2>&1 \
         || { echo "$ko[ lunch ]$rz" >&2 && exit 1 ; }
@@ -98,7 +98,7 @@ androidBuildId=$(egrep "^(export\s)?\s*BUILD_ID=" build/core/build_id.mk 2>/dev/
 androidSecurityPatch=$(egrep "^\s*PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
 [[ ! $androidSecurityPatch =~ ^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$ ]] && echo "$ko[ androidSecurityPatch ]$rz" >&2 && exit 1
 androidBuildVariant=$(echo "$TARGET_BUILD_VARIANT" | cut -d'=' -f2)
-[[ ! $androidBuildVariant =~ ^[a-z]+$ ]] && echo "$ko[ androidBuildVariant ]$rz" >&2 && exit 1
+[[ ! $androidBuildVariant =~ ^(eng|userdebug|user)$ ]] && echo "$ko[ androidBuildVariant ]$rz" >&2 && exit 1
 device=$(echo "$TARGET_PRODUCT" | cut -d'_' -f2-)
 [ -z "$device" ] && echo "$ko[ device ]$rz" >&2 && exit 1
 echo "$bd[ Android $androidVersion $androidBuildId ]$rz"
