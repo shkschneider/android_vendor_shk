@@ -176,11 +176,10 @@ if [ "$device" = "emulator" ] ; then
             elif [[ ! $screenHeight =~ ^[0-9]+$ ]] ; then
                 echo "$wn[ xrandr ]$rz" >&2
             else
-                scale=10
-                while [ $scale -le 100 ] ; do
-                    height=$(($(($layoutHeight / 100)) * $(($scale + 10))))
+                screenHeight=$(($(($screenHeight / 100)) * 90))
+                for scale in {10..100} ; do
+                    height=$(($(($layoutHeight / 100)) * $(($scale + 1))))
                     [ $height -ge $screenHeight ] && break
-                    scale=$(($scale + 10))
                 done
             fi
         fi
