@@ -27,12 +27,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 ifeq ($(TARGET_BUILD_VARIANT),eng)
 PRODUCT_PACKAGES += \
-	Browser \
 	Calendar \
 	Camera2 \
 	Contacts \
 	DeskClock \
-	Email \
 	ExactCalulator \
 	Mms messaging \
 	Music
