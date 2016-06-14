@@ -23,7 +23,10 @@ wn=$(tput setaf 3)
 ko=$(tput setaf 1)
 rz=$(tput sgr0)
 
-# general checks
+command -v git >/dev/null 2>&1 \
+    || { echo "$ko[ git ]$rz" >&2 && exit 1 ; }
+
+# manifests
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
 default=".repo/manifests/default.xml"
 roomservice=".repo/local_manifests/roomservice.xml"

@@ -29,12 +29,6 @@ id=${id:-"shkmod"}
 [[ ! $id =~ ^[a-zA-Z0-9]+$ ]] && echo "$ko[ id ]$rz" >&2 && exit 1
 
 # general checks
-[ ! -f "/proc/cpuinfo" ] && echo "$ko[ /proc/cpuinfo ]$rz" >&2 && exit 1
-egrep '^flags\s*:' "/proc/cpuinfo" 2>/dev/null | head -1 | grep -w 'lm' >/dev/null \
-    || { echo "$ko[ 64bits ]$rz" >&2 && exit 1 ; }
-command -v java >/dev/null 2>&1 \
-    || { echo "$ko[ java ]$rz" >&2 && exit 1 ; }
-[ -z "$(java -version 2>&1 | grep OpenJDK)" ] && echo "$ko[ OpenJDK ]$rz" >&2 && exit 1
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
 [ ! -f ".repo/manifests/default.xml" ] && echo "$ko[ .repo/manifests/default.xml ]$rz" >&2 && exit 1
 [ ! -f ".repo/local_manifests/roomservice.xml" ] && echo "$ko[ .repo/local_manifests/roomservice.xml ]$rz" >&2 && exit 1
