@@ -51,20 +51,28 @@ while getopts ":ic" opt ; do
 done
 shift $((OPTIND - 1))
 [ $# -gt 1 ] && shift && echo "$ko[ $@ ]$rz" >&2 && exit 1
-[ ! -f "vendor/shk/vendorsetup.sh" ] && echo "$ko[ vendor/shk/vendorsetup.sh ]$rz" >&2 && exit 1
+
+# targets
 target=""
-while read t ; do
-    t=$(echo "$t" | cut -d' ' -f2)
+while read file ; do
+    t=$(egrep '^PRODUCT_NAME' "$file" | sed -r 's;#.+$;;g' | awk '{print $NF}')
     [ -z "$t" ] && continue
+    [[ $t =~ _emulator$ ]] && variants="eng userdebug" || variants="user"
     # lists targets if none specified
     if [ $# -eq 0 ] ; then
-        echo $t
+        for variant in $variants ; do
+            echo "$t-$variant"
+        done
     # selects target
-    elif [ "$t" = "$1" ] ; then
-        target=$t
-        break
+    else
+        for variant in $variants ; do
+            if [ "$t-$variant" = "$1" ] ; then
+                target="$t-$variant"
+                break
+            fi
+        done
     fi
-done < <(egrep '^add_lunch_combo\s+[a-z]+_[a-z_0-9]+\-[a-z]+' vendor/shk/vendorsetup.sh)
+done < <(find "vendor/shk/products/" -type f -name "shkmod_*.mk" | sort)
 [ $# -eq 0 ] && exit 1
 
 # lunch if needed

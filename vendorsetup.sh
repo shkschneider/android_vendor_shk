@@ -14,9 +14,15 @@
 # limitations under the License.
 #
 
-add_lunch_combo shkmod_emulator-eng
-add_lunch_combo shkmod_emulator-userdebug
-add_lunch_combo shkmod_hammerhead-user
-add_lunch_combo shkmod_shamu-user
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[ -z "$dir" ] && exit 1
+while read file ; do
+    target=$(egrep '^PRODUCT_NAME' "$file" | sed -r 's;#.+$;;g' | awk '{print $NF}')
+    [ -z "$target" ] && continue
+    [[ $t =~ _emulator$ ]] && variants="eng userdebug" || variants="user"
+    for variant in $variants ; do
+        add_lunch_combo "$target-$variant"
+    done
+done < <(find "$dir" -type f -name "shkmod_*.mk")
 
 # EOF
