@@ -18,15 +18,20 @@ PRODUCT_NAME ?= shkmod
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=16.06.07 \
+	ro.mod.version=16.07.00 \
 	persist.adb.notify=0
 ifeq ($(TARGET_BUILD_VARIANT),user)
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.adb.secure=1
 endif
 
+ifneq ("$(wildcard vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip)","")
+PRODUCT_COPY_FILES += \
+        vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
+else
 PRODUCT_COPY_FILES += \
         vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
+endif
 PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
