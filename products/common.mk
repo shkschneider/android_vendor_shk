@@ -25,6 +25,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.adb.secure=1
 endif
 
+PRODUCT_PACKAGES += \
+
 ifneq ("$(wildcard vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip)","")
 PRODUCT_COPY_FILES += \
         vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
