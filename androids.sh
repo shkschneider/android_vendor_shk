@@ -14,10 +14,9 @@
 # limitations under the License.
 #
 
-curl -s https://android.googlesource.com/platform/manifest/+refs 2>/dev/null \
-    | sed 's;</li><li;\n;g' \
-    | egrep '"/platform/manifest/\+/android-[0-9\.]+(_r[0-9]+)?"' \
-    | sed -r 's;^.+"/platform/manifest/\+/(android-[0-9\.]+(_r[0-9]+)?)".+$;\1;g' \
+git ls-remote --heads https://android.googlesource.com/platform/manifest \
+    | egrep 'android-[0-9\.]+(_r[0-9]+)?' \
+    | rev | cut -d'/' -f1 | rev \
     | sort -V
 
 manifest=".repo/manifests/default.xml"
