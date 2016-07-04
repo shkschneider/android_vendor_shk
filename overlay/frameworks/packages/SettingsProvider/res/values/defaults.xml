@@ -44,6 +44,6 @@
   <!-- long press timeout -->
   <integer name="def_long_press_timeout_millis">400</integer>
   <!-- stay on while plugged in -->
-  <bool name="def_stay_on_while_plugged_in">true</bool>
+  <bool name="def_stay_on_while_plugged_in">false</bool>
 
 </resources>
