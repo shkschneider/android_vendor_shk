@@ -15,7 +15,7 @@
 #
 
 git ls-remote --heads https://android.googlesource.com/platform/manifest \
-    | egrep 'android-[0-9\.]+(_r[0-9]+)?' \
+    | egrep 'android-[0-9\.]+(w?_r[0-9]+)?' \
     | rev | cut -d'/' -f1 | rev \
     | sort -V
 

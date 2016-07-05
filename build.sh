@@ -90,7 +90,7 @@ modVersion=$(egrep "^\s*ro.mod.version=" vendor/shk/products/common.mk 2>/dev/nu
 echo "$bd[ $modName $modVersion ]$rz"
 modName=$(echo "$modName" | tr '[A-Z]' '[a-z]')
 androidRevision=$(egrep 'default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's;refs/tags/;;')
-[[ ! $androidRevision =~ ^android-[0-9\.]+(_r[0-9]+)?$ ]] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
+[[ ! $androidRevision =~ ^android-[0-9\.]+(w?_r[0-9]+)?$ ]] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
 androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
 [[ ! $androidVersion =~ ^[0-9]+(\.[0-9]+)*$ ]] && echo "$ko[ androidVersion ]$rz" >&2 && exit 1
 androidSdkVersion=$(egrep "^\s*PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
