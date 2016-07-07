@@ -57,14 +57,18 @@ cd - >/dev/null
 c=$(basename $(cat "$default" | egrep 'default\s+revision' | cut -d'"' -f2))
 [ -z "$c" ] && echo "$ko[ default revision ]$rz" >&2 && exit 1
 if [ "$c" != "$ref" ] ; then
-    echo "$wn  $default: $ref$rz" >&2
+    echo "$wn  $default: $c$rz" >&2
     cd ".repo/manifests"
     r=$(git ls-remote --heads 2>/dev/null | grep "refs/heads/$ref" | wc -l)
     [ $r -eq 0 ] && echo "$wn  git ls-remote$rz" >&2 && exit 1
-    git checkout "$ref" >/dev/null 2>&1
+    git fetch -a >/dev/null 2>&1
+    [ $? -ne 0 ] && echo "$wn  git fetch$rz" >&2 && exit 1
+    git checkout default >/dev/null 2>&1
     [ $? -ne 0 ] && echo "$wn  git checkout$rz" >&2 && exit 1
-    git pull >/dev/null 2>&1
-    [ $? -ne 0 ] && echo "$wn  git pull$rz" >&2 && exit 1
+    git reset --hard "origin/$ref" >/dev/null 2>&1
+    [ $? -ne 0 ] && echo "$wn  git reset --hard$rz" >&2 && exit 1
+    git branch -u "origin/$ref" >/dev/null 2>&1
+    [ $? -ne 0 ] && echo "$wn  git branch -u$rz" >&2 && exit 1
     echo "  $default: $ref" >&2
     cd - >/dev/null
 fi
