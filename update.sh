@@ -33,9 +33,11 @@ roomservice=".repo/local_manifests/roomservice.xml"
 
 # arguments parsing
 info=0
-while getopts ":i" opt ; do
+push=0
+while getopts ":ip" opt ; do
     case $opt in
         i) info=1 ;;
+        p) push=1 ;;
         # allows no other option
         \?) echo "$ko[ -$OPTARG ]$rz" >&2 && exit 1 ;;
     esac
@@ -50,12 +52,12 @@ echo "$bd[ $ref ]$rz"
 [ ! -f "$default" ] && echo "$ko[ $default ]$rz" >&2 && exit 1
 cd ".repo/manifests"
 git diff --exit-code -- default.xml 2>/dev/null >&2
-[ $? -ne 0 ] && echo "$wn  git status$rz" >&2
+[ $? -ne 0 ] && echo "$wn  git status: $default$rz" >&2
 cd - >/dev/null
 c=$(basename $(cat "$default" | egrep 'default\s+revision' | cut -d'"' -f2))
 [ -z "$c" ] && echo "$ko[ default revision ]$rz" >&2 && exit 1
 if [ "$c" != "$ref" ] ; then
-    echo "$wn  $default: $r$rz" >&2
+    echo "$wn  $default: $ref$rz" >&2
     cd ".repo/manifests"
     r=$(git ls-remote --heads 2>/dev/null | grep "refs/heads/$ref" | wc -l)
     [ $r -eq 0 ] && echo "$wn  git ls-remote$rz" >&2 && exit 1
@@ -71,7 +73,7 @@ fi
 [ ! -f "$roomservice" ] && echo "$ko[ $roomservice ]$rz" >&2 && exit 1
 cd ".repo/local_manifests"
 git diff --exit-code -- roomservice.xml 2>/dev/null >&2
-[ $? -ne 0 ] && echo "$wn  git status$rz" >&2
+[ $? -ne 0 ] && echo "$wn  git status: $roomservice$rz" >&2
 cd - >/dev/null
 
 # all my repositories (except vendor)
@@ -94,10 +96,6 @@ for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | 
         git checkout "$branch" 2>/dev/null >&2
         [ $? -ne 0 ] && echo "$ko  git checkout$rz" >&2 && cd - >/dev/null && continue
     fi
-    # github remote
-    echo "  remote github"
-    git remote show github 2>/dev/null >&2
-    [ $? -ne 0 ] && echo "$ko  git remote: github$rz" >&2 && cd - >/dev/null && continue
     # aosp remote
     echo "  remote aosp"
     git remote show aosp 2>/dev/null >&2
@@ -119,12 +117,18 @@ for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | 
         cd - >/dev/null
         continue
     fi
-    # push (if needed)
-    if [ "$(git rev-parse HEAD)" != "$commit" ] ; then
-        echo "  pushing..."
-        git push github "$branch" >/dev/null
-    else
-        echo "  up-to-date"
+    if [ $push -eq 1 ] ; then
+        # github remote
+        echo "  remote github"
+        git remote show github 2>/dev/null >&2
+        [ $? -ne 0 ] && echo "$ko  git remote: github$rz" >&2 && cd - >/dev/null && continue
+        # push (if needed)
+        if [ "$(git rev-parse HEAD)" != "$commit" ] ; then
+            echo "  pushing..."
+            git push github "$branch" >/dev/null
+        else
+            echo "  up-to-date"
+        fi
     fi
     cd - >/dev/null
 done
