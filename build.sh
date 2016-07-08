@@ -83,23 +83,23 @@ if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" -o "$TARGET_PRODUCT-$TARGET_BUILD
 fi
 
 # summary
-modName=$(egrep "^\s*ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
+modName=$(egrep "^\s*ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1 | sort -n | tail -1)
 [[ ! $modName =~ ^[a-zA-Z]+$ ]] && echo "$ko[ modName ]$rz" >&2 && exit 1
-modVersion=$(egrep "^\s*ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1)
+modVersion=$(egrep "^\s*ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1 | sort -n | tail -1)
 [[ ! $modVersion =~ ^[0-9]+(\.[0-9]+)*$ ]] && echo "$ko[ modVersion ]$rz" >&2 && exit 1
 echo "$bd[ $modName $modVersion ]$rz"
 modName=$(echo "$modName" | tr '[A-Z]' '[a-z]')
-androidRevision=$(egrep 'default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's;refs/tags/;;')
+androidRevision=$(egrep 'default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's;refs/tags/;;' | head -1)
 [[ ! $androidRevision =~ ^android-[0-9\.]+(w?_r[0-9]+)?$ ]] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
-androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
+androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidVersion =~ ^[0-9]+(\.[0-9]+)*$ ]] && echo "$ko[ androidVersion ]$rz" >&2 && exit 1
-androidSdkVersion=$(egrep "^\s*PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
+androidSdkVersion=$(egrep "^\s*PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidSdkVersion =~ ^[0-9]+$ ]] && echo "$ko[ androidSdkVersion ]$rz" >&2 && exit 1
-androidBuildId=$(egrep "^(export\s)?\s*BUILD_ID=" build/core/build_id.mk 2>/dev/null | cut -d'=' -f2)
+androidBuildId=$(egrep "^(export\s)?\s*BUILD_ID=" build/core/build_id.mk 2>/dev/null | cut -d'=' -f2 | sort -n | tail -1)
 [[ ! $androidBuildId =~ ^[A-Z]{3}[0-9]{2}[A-Z]?$ ]] && echo "$ko[ androidBuildId ]$rz" >&2 && exit 1
-androidSecurityPatch=$(egrep "^\s*PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}')
+androidSecurityPatch=$(egrep "^\s*PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidSecurityPatch =~ ^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$ ]] && echo "$ko[ androidSecurityPatch ]$rz" >&2 && exit 1
-androidBuildVariant=$(echo "$TARGET_BUILD_VARIANT" | cut -d'=' -f2)
+androidBuildVariant=$(echo "$TARGET_BUILD_VARIANT" | cut -d'=' -f2 | head -1)
 [[ ! $androidBuildVariant =~ ^(eng|userdebug|user)$ ]] && echo "$ko[ androidBuildVariant ]$rz" >&2 && exit 1
 device=$(echo "$TARGET_PRODUCT" | cut -d'_' -f2-)
 [ -z "$device" ] && echo "$ko[ device ]$rz" >&2 && exit 1
