@@ -217,7 +217,7 @@ else
     echo "  sign_target_files_apks"
     [ ! -f "./build/tools/releasetools/sign_target_files_apks" ] && echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1
     dist="$(echo $out | sed -r "s;target/product/$device\$;;")dist"
-    ./build/tools/releasetools/sign_target_files_apks ${dist}/${modname}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null \
+    ./build/tools/releasetools/sign_target_files_apks ${dist}/${modName}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null \
         || { echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1 ; }
     [ ! -f "$signed" ] && echo "$ko[ $signed ]$rz" >&2 && exit 1
     unset dist
