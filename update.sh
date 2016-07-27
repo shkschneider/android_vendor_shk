@@ -126,14 +126,10 @@ for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | 
         echo "  remote github"
         git remote show github 2>/dev/null >&2
         [ $? -ne 0 ] && echo "$ko  git remote: github$rz" >&2 && cd - >/dev/null && continue
-        # push (if needed)
-        if [ "$(git rev-parse HEAD)" != "$commit" ] ; then
-            echo "  pushing..."
-            git push github "$branch" >/dev/null
-        else
-            echo "  up-to-date"
-        fi
+        echo "  pushing..."
+        git push github "$branch" >/dev/null
     fi
+    git checkout $(git rev-parse HEAD) >/dev/null 2>&1
     cd - >/dev/null
 done
 
