@@ -220,7 +220,6 @@ else
     ./build/tools/releasetools/sign_target_files_apks ${dist}/${modName}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null \
         || { echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1 ; }
     [ ! -f "$signed" ] && echo "$ko[ $signed ]$rz" >&2 && exit 1
-    unset dist
     echo "  - $signed"
     # ota_from_target_files
     echo "  ota_from_target_files"
@@ -248,6 +247,9 @@ else
     echo "show_progress(1.34, 750);" >> ${updaterscript}
     unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript} \
         || { echo "$ko[ unzip ]$rz" >&2 && exit 1 ; }
+    echo "ui_print(\"\");" >> ${updaterscript}
+    echo "ui_print(\"SUCCESS\");" >> ${updaterscript}
+    echo "ui_print(\"\");" >> ${updaterscript}
     zip -u ${ota} ${updaterscript} >/dev/null \
         || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
     rm -rf META-INF
@@ -269,16 +271,19 @@ else
     mv ${ota} ${rom}
     unset ota
     [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
-    echo "$bd$ok[ $rom   $(md5sum "$rom" | awk '{print $1}') ]$rz"
-    factory="$dist/${TARGET_PRODUCT}-img-eng.${USER}.zip"
+    echo "$bd$ok[ $rom $(md5sum "$rom" | awk '{print $1}') ]$rz"
+    factory="$dist/${TARGET_PRODUCT}-img-eng.${id}.zip"
     if [ -f "$factory" ] ; then
         mv ${factory} ${stock}
         echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
     fi
-    unset factory stock rom
-    # root?
+    unset dist factory stock rom
     # gapps
     echo "  http://opengapps.org"
+    # fdroid (seSuperuser, AdAway)
+    echo "  http://f-droid.org"
+    # root (seSuperuser)
+    echo "  http://superuser.phh.me/superuser.zip"
 fi
 
 # done
