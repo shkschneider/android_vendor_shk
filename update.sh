@@ -52,7 +52,7 @@ echo "$bd[ $ref ]$rz"
 [ ! -f "$default" ] && echo "$ko[ $default ]$rz" >&2 && exit 1
 cd ".repo/manifests"
 git diff --exit-code -- default.xml 2>/dev/null >&2
-[ $? -ne 0 ] && echo "$wn  git status: $default$rz" >&2
+[ $? -ne 0 ] && echo "$wn  $default$rz" >&2
 cd - >/dev/null
 c=$(basename $(cat "$default" | egrep 'default\s+revision' | cut -d'"' -f2))
 [ -z "$c" ] && echo "$ko[ default revision ]$rz" >&2 && exit 1
@@ -77,7 +77,7 @@ fi
 [ ! -f "$roomservice" ] && echo "$ko[ $roomservice ]$rz" >&2 && exit 1
 cd ".repo/local_manifests"
 git diff --exit-code -- roomservice.xml 2>/dev/null >&2
-[ $? -ne 0 ] && echo "$wn  git status: $roomservice$rz" >&2
+[ $? -ne 0 ] && echo "$wn  $roomservice$rz" >&2
 cd - >/dev/null
 
 # all my repositories (except vendor)
