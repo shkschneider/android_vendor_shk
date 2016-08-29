@@ -113,8 +113,8 @@ for p in $(cat "$roomservice" | grep ' remote="github"' | grep " name=\"$id/" | 
     git show-ref "refs/tags/$ref" 2>/dev/null >&2
     [ $? -ne 0 ] && echo "$wn  git show-ref: $ref$rz" >&2 && cd - >/dev/null && continue
     # pull
-    echo "  pulling..."
-    git pull aosp "$ref" 2>/dev/null >&2
+    echo "  pulling (theirs)..."
+    git pull -X theirs aosp "$ref" 2>/dev/null >&2
     if [ $? -ne 0 ] ; then
         conflicts=$(($conflicts + 1))
         echo "$wn  conflicts$rz" >&2
