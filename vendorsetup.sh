@@ -19,7 +19,8 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 while read file ; do
     target=$(egrep '^PRODUCT_NAME' "$file" | sed -r 's;#.+$;;g' | awk '{print $NF}')
     [ -z "$target" ] && continue
-    [[ $t =~ _emulator$ ]] && variants="eng userdebug" || variants="user"
+    [[ $target =~ _emulator$ ]] && variants="eng userdebug" || variants="user"
+    echo "$file"
     for variant in $variants ; do
         add_lunch_combo "$target-$variant"
     done
