@@ -15,13 +15,13 @@
 #
 
 git ls-remote --heads https://android.googlesource.com/platform/manifest \
-    | egrep 'android-[0-9\.]+(w?_r[0-9]+)?' \
+    | egrep 'android-[0-9]' \
     | rev | cut -d'/' -f1 | rev \
     | sort -V
 
 manifest=".repo/manifests/default.xml"
 [ ! -f "$manifest" ] && exit 0
-default=$(grep '<default' $manifest 2>/dev/null | cut -d'"' -f2)
+default=$(grep '<default' $manifest 2>/dev/null | cut -d'"' -f2 | rev | cut -d'/' -f1 | rev)
 [ -n "$default" ] && echo "[ $default ]"
 
 exit 0
