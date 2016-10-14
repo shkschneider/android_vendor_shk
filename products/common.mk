@@ -18,7 +18,7 @@ PRODUCT_NAME ?= shkmod
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=16.08.05 \
+	ro.mod.version=16.10.14 \
 	persist.adb.notify=0
 ifeq ($(TARGET_BUILD_VARIANT),user)
 PRODUCT_PROPERTY_OVERRIDES += \
