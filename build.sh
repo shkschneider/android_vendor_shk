@@ -27,6 +27,9 @@ rz=$(tput sgr0)
 id=$(egrep '^\s*PRODUCT_NAME' "vendor/shk/products/common.mk" 2>/dev/null | cut -d'#' -f1 | awk '{print $NF}')
 id=${id:-"shkmod"}
 [[ ! $id =~ ^[a-zA-Z0-9]+$ ]] && echo "$ko[ id ]$rz" >&2 && exit 1
+# jobs
+j="$(grep 'cpu cores' /proc/cpuinfo uniq 2>/dev/null | uniq | awk '{print $NF}')"
+[[ ! $j =~ ^[0-9]+$ ]] && j="2"
 
 # general checks
 [ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
@@ -96,7 +99,7 @@ androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 
 androidSdkVersion=$(egrep "^\s*PLATFORM_SDK_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidSdkVersion =~ ^[0-9]+$ ]] && echo "$ko[ androidSdkVersion ]$rz" >&2 && exit 1
 androidBuildId=$(egrep "^(export\s)?\s*BUILD_ID=" build/core/build_id.mk 2>/dev/null | cut -d'=' -f2 | sort -n | tail -1)
-[[ ! $androidBuildId =~ ^[A-Z]{3}[0-9]{2}[A-Z]?$ ]] && echo "$ko[ androidBuildId ]$rz" >&2 && exit 1
+[[ ! $androidBuildId =~ ^[A-Z0-9]{3}[0-9]{2}[A-Z]?$ ]] && echo "$ko[ androidBuildId ]$rz" >&2 && exit 1
 androidSecurityPatch=$(egrep "^\s*PLATFORM_SECURITY_PATCH :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidSecurityPatch =~ ^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$ ]] && echo "$ko[ androidSecurityPatch ]$rz" >&2 && exit 1
 androidBuildVariant=$(echo "$TARGET_BUILD_VARIANT" | cut -d'=' -f2 | head -1)
@@ -130,7 +133,6 @@ buildprop="system/build.prop"
 signed="signed-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 ota="ota-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 rom="rom-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
-stock="stock-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 ccache="./prebuilts/misc/$(uname -s | tr "[A-Z]" "[a-z]")-x86/ccache/ccache"
 if [ -f "$ccache" ] ; then
     echo "  ccache"
@@ -160,7 +162,7 @@ echo "  *.img"
 rm -f "$out/*.img" 2>/dev/null
 if [ $clean -eq 1 ] ; then
     echo "  make installclean"
-    make -j installclean >/dev/null \
+    make -j$j installclean >/dev/null \
         || { echo "$ko[ make installclean ]$rz" >&2 && exit 1 ; }
 fi
 
@@ -168,7 +170,7 @@ echo "$bd[ Building... ]$rz"
 # emulator: make droid
 if [ "$device" = "emulator" ] ; then
     echo "  make droid"
-    make -j droid >/dev/null \
+    make -j$j droid >/dev/null \
         || { echo "$ko[ make droid ]$rz" >&2 && exit 1 ; }
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     [ ! -f "$out/sdcard.img" ] && mksdcard -l sdcard 1024M "$out/sdcard.img" 2>/dev/null
@@ -209,7 +211,7 @@ if [ "$device" = "emulator" ] ; then
 # else: make dist
 else
     echo "  make dist"
-    make -j dist >/dev/null \
+    make -j$j dist >/dev/null \
         || { echo "$ko[ make dist ]$rz" >&2 && exit 1 ; }
     [ ! -d "$out" ] && echo "$ko[ out: $out ]$rz" >&2 && exit 1
     echo "$bd[ Assembling... ]$rz"
@@ -244,7 +246,7 @@ else
     echo "ui_print(\"\");" >> ${updaterscript}
     echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
     echo "ui_print(\"\");" >> ${updaterscript}
-    echo "show_progress(1.34, 750);" >> ${updaterscript}
+    echo "show_progress(1.34, 999);" >> ${updaterscript}
     unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript} \
         || { echo "$ko[ unzip ]$rz" >&2 && exit 1 ; }
     echo "ui_print(\"\");" >> ${updaterscript}
@@ -272,12 +274,7 @@ else
     unset ota
     [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
     echo "$bd$ok[ $rom $(md5sum "$rom" | awk '{print $1}') ]$rz"
-    factory="$dist/${TARGET_PRODUCT}-img-eng.${id}.zip"
-    if [ -f "$factory" ] ; then
-        mv ${factory} ${stock}
-        echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
-    fi
-    unset dist factory stock rom
+    unset dist rom
     # gapps
     echo "  http://opengapps.org"
     # fdroid (seSuperuser, AdAway)
@@ -288,7 +285,7 @@ fi
 
 # done
 T=$(($(date +%s) - $T))
-printf "Done in %02d:%02d:%02d with %d CPUs\n" "$((T/3600%24))" "$((T/60%60))" "$((T%60))" "$(nproc)"
+printf "Done in %02d:%02d:%02d with %d jobs\n" "$((T/3600%24))" "$((T/60%60))" "$((T%60))" "$j"
 
 exit 0
 
