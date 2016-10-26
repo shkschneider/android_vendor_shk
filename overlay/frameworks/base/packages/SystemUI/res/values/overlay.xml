@@ -21,12 +21,6 @@
 
   <!-- Ambient Display -->
   <bool name="doze_display_state_supported">true</bool>
-  <bool name="doze_proximity_check_before_pulse">true</bool>
-  <bool name="doze_pulse_on_significant_motion">false</bool>
   <bool name="doze_pulse_on_pick_up">false</bool>
-  <bool name="doze_pulse_on_notifications">true</bool>
-  <integer name="doze_pulse_duration_visible">3000</integer>
-  <integer name="doze_pulse_schedule_resets">1</integer>
-  <string name="doze_pulse_schedule" translatable="false">10s,30s,60s</string>
 
 </resources>
