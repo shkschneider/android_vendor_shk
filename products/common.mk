@@ -34,15 +34,23 @@ else
 PRODUCT_COPY_FILES += \
         vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
 endif
+
 PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
+
 ifeq ($(TARGET_SUPPORTS_64_BIT_APPS),true)
 PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/lib64/libjni_latinimegoogle.so:system/lib64/libjni_latinimegoogle.so
 else
 PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/lib/libjni_latinimegoogle.so:system/lib/libjni_latinimegoogle.so
+endif
+
+ifneq ($(filter shamu,$(TARGET_PRODUCT)),)
+PRODUCT_COPY_FILES +=  \
+    vendor/shk/prebuilt/system/vendor/media/LMspeed_508.emd:system/vendor/media/LMspeed_508.emd \
+    vendor/shk/prebuilt/system/vendor/media/PFFprec_600.emd:system/vendor/media/PFFprec_600.emd
 endif
 
 PRODUCT_RESTRICT_VENDOR_FILES := false
