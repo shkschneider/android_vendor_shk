@@ -134,10 +134,10 @@ signed="signed-${modName}-${modVersion}-${device}-android-${androidVersion}-${an
 ota="ota-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 rom="rom-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 ccache="./prebuilts/misc/$(uname -s | tr "[A-Z]" "[a-z]")-x86/ccache/ccache"
-if [ -f "$ccache" ] ; then
+if [[ -f "$ccache" ]] && [[ -x "$ccache" ]] ; then
     echo "  ccache"
     export USE_CCACHE=1
-    export CCACHE_DIR=$(pwd)/.ccache
+    export CCACHE_DIR="$(pwd)/.ccache"
     $ccache -M ${androidSdkVersion}G >/dev/null \
         || { echo "$ko[ ccache ]$rz" >&2 && exit 1 ; }
 else
@@ -146,7 +146,7 @@ fi
 unset ccache
 echo "  ulimit"
 ulimit -S -n 1024 || echo "$wn[ ulimit ]$rz" >&2
-out=$(echo $ANDROID_PRODUCT_OUT | sed -r "s;^$(pwd)/;;")
+out=$(echo "$ANDROID_PRODUCT_OUT" | sed -r "s;^$(pwd)/;;")
 
 # cleaning
 [ "$androidBuildVariant" != "eng" ] && clean=1
@@ -183,8 +183,8 @@ if [ "$device" = "emulator" ] ; then
         elif [ ! -f "$skin/layout" ] ; then
             echo "$wn[ $skin/layout ]$rz" >&2
         else
-            layoutHeight=$(egrep 'height\s+[0-9]+' "$skin/layout" | awk '{print $NF}' | sort -rn | head -1)
-            screenHeight=$(xrandr -q | egrep 'primary' | sed -r 's;^.+[0-9]+x([0-9]+)[^0-9].+$;\1;')
+            layoutHeight=$(egrep 'height\s+[0-9]+' "$skin/layout" 2>/dev/null | awk '{print $NF}' | sort -rn | head -1)
+            screenHeight=$(xrandr -q 2>/dev/null | egrep 'primary' | sed -r 's;^.+[0-9]+x([0-9]+)[^0-9].+$;\1;')
             if [[ ! $layoutHeight =~ ^[0-9]+$ ]] ; then
                 echo "$wn[ $skin/layout ]$rz" >&2
             elif [[ ! $screenHeight =~ ^[0-9]+$ ]] ; then
