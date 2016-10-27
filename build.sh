@@ -81,7 +81,7 @@ done < <(find "vendor/shk/products/" -type f -name "shkmod_*.mk" | sort)
 # lunch if needed
 [[ ! $target =~ ^([a-z]+_)?[a-z0-9][a-z_0-9]*[a-z0-9]\-(eng|userdebug|user)$ ]] && echo "$ko[ target ]$rz" >&2 && exit 1
 if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" -o "$TARGET_PRODUCT-$TARGET_BUILD_VARIANT" != "target" ] ; then
-    lunch "$target" >/dev/null 2>&1 \
+    lunch "$target" >/dev/null \
         || { echo "$ko[ lunch ]$rz" >&2 && exit 1 ; }
 fi
 
