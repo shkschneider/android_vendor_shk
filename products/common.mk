@@ -39,12 +39,6 @@ PRODUCT_COPY_FILES += \
 	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
 	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
 
-ifneq ($(filter shamu,$(TARGET_PRODUCT)),)
-PRODUCT_COPY_FILES +=  \
-    vendor/shk/prebuilt/system/vendor/media/LMspeed_508.emd:system/vendor/media/LMspeed_508.emd \
-    vendor/shk/prebuilt/system/vendor/media/PFFprec_600.emd:system/vendor/media/PFFprec_600.emd
-endif
-
 PRODUCT_RESTRICT_VENDOR_FILES := false
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
