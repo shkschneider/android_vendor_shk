@@ -22,6 +22,11 @@ wn=$(tput setaf 3)
 ko=$(tput setaf 1)
 rz=$(tput sgr0)
 
+# commands
+command -v make >/dev/null 2>&1 || { echo "$ko[ make ]$rz" >&2 && exit 1 ; }
+command -v unzip >/dev/null 2>&1 || { echo "$ko[ unzip ]$rz" >&2 && exit 1 ; }
+command -v zip >/dev/null 2>&1 || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
+
 # id
 [ ! -f "vendor/shk/products/common.mk" ] && echo "$ko[ vendor/shk/products/common.mk ]$rz" >&2 && exit 1
 id=$(egrep '^\s*PRODUCT_NAME' "vendor/shk/products/common.mk" 2>/dev/null | cut -d'#' -f1 | awk '{print $NF}')
@@ -235,6 +240,8 @@ else
     echo "$bd[ Finalizing... ]$rz"
     # updater-script
     echo "  updater-script"
+    [ -d META-INF ] && \
+        { echo "$wn[ META-INF ]$rz" >&2 && exit 1 ; }
     mkdir -p $(dirname ${updaterscript}) >/dev/null
     rm -f ${updaterscript}
     echo "ui_print(\"  _________.__     __      _____             .___\");" >> ${updaterscript}
@@ -244,31 +251,39 @@ else
     echo "ui_print(\"/_______  /|___|  /__|_ \\____|__  /\\____/\\____ | \");" >> ${updaterscript}
     echo "ui_print(\"        \\/      \\/     \\/       \\/            \\/ \");" >> ${updaterscript}
     echo "ui_print(\"\");" >> ${updaterscript}
-    echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ $androidRevision\");" >> ${updaterscript}
+    echo "ui_print(\"Android ${androidVersion} #${androidBuildId} @ ${androidRevision}\");" >> ${updaterscript}
     echo "ui_print(\"\");" >> ${updaterscript}
     echo "show_progress(1.34, 999);" >> ${updaterscript}
-    unzip -p ${ota} ${updaterscript} | grep -v 'ui_print' | grep -v 'show_progress' >> ${updaterscript} \
-        || { echo "$ko[ unzip ]$rz" >&2 && exit 1 ; }
+    unzip -p ${ota} ${updaterscript} | egrep -v '^(ui_print|show_progress)' >> ${updaterscript} \
+        || { echo "$ko[ unzip ${updaterscript} ]$rz" >&2 && exit 1 ; }
     echo "ui_print(\"\");" >> ${updaterscript}
     echo "ui_print(\"SUCCESS\");" >> ${updaterscript}
     echo "ui_print(\"\");" >> ${updaterscript}
+    [ -n "$(grep 'recovery' ${updaterscript})" ] && \
+        { echo "$wn[ recovery ${updaterscript} ]$rz" >&2 ; }
     zip -u ${ota} ${updaterscript} >/dev/null \
-        || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
+        || { echo "$ko[ zip ${updaterscript} ]$rz" >&2 && exit 1 ; }
     rm -rf META-INF
     unset updaterscript
     # build.prop
     echo "  build.prop"
     unzip -p ${ota} ${buildprop} > ${buildprop} \
-        || { echo "$ko[ unzip ]$rz" >&2 && exit 1 ; }
+        || { echo "$ko[ unzip ${buildprop} ]$rz" >&2 && exit 1 ; }
     sed -i '/^$/d' ${buildprop}
     zip -u ${ota} ${buildprop} >/dev/null \
-        || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
+        || { echo "$ko[ zip ${buildprop} ]$rz" >&2 && exit 1 ; }
     rm -f ${buildprop}
     unset buildprop
     # recovery
     echo "  recovery"
-    zip -d ${ota} "system/etc/recovery-resource.dat" >/dev/null \
-        || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
+    [ -n "$(unzip -l ${ota} | egrep 'system/bin/install-recovery.sh$')" ] && \
+        { echo "$wn[ system/bin/install-recovery.sh ]$rz" >&2 ; }
+    [ -n "$(unzip -l ${ota} | egrep 'system/etc/recovery-resource.dat$')" ] && \
+        { echo "$wn[ system/etc/recovery-resource.dat ]$rz" >&2 ; }
+    [ -n "$(unzip -l ${ota} | egrep 'system/recovery-from-boot.p$')" ] && \
+        { echo "$wn[ system/recovery-from-boot.p ]$rz" >&2 ; }
+    [ -n "$(unzip -l ${ota} | egrep 'recovery/recovery-from-boot.p$')" ] && \
+        { echo "$wn[ recovery/recovery-from-boot.p ]$rz" >&2 ; }
     # rom
     mv ${ota} ${rom}
     unset ota
