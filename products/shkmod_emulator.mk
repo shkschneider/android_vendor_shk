@@ -27,12 +27,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 ifeq ($(TARGET_BUILD_VARIANT),eng)
 PRODUCT_PACKAGES += \
-	Calendar \
-	Camera2 \
-	Contacts \
-	DeskClock \
-	ExactCalulator \
-	Mms messaging \
 	Music
 endif
 

@@ -226,17 +226,15 @@ else
     dist="$(echo $out | sed -r "s;target/product/$device\$;;")dist"
     ./build/tools/releasetools/sign_target_files_apks ${dist}/${modName}_${device}-target_files-eng.${USER}.zip ${signed} >/dev/null \
         || { echo "$ko[ sign_target_files_apks ]$rz" >&2 && exit 1 ; }
-    [ ! -f "$signed" ] && echo "$ko[ $signed ]$rz" >&2 && exit 1
-    echo "  - $signed"
+    [ ! -f "$signed" ] && echo "$ko[ $(basename $signed) ]$rz" >&2 && exit 1
     # ota_from_target_files
     echo "  ota_from_target_files"
     [ ! -f "./build/tools/releasetools/ota_from_target_files" ] && echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1
     ./build/tools/releasetools/ota_from_target_files -n ${signed} ${ota} > /dev/null \
         || { echo "$ko[ ota_from_target_files ]$rz" >&2 && exit 1 ; }
-    [ ! -f "$ota" ] && echo "$ko[ $ota ]$rz" >&2 && exit 1
+    [ ! -f "$ota" ] && echo "$ko[ $(basename $ota) ]$rz" >&2 && exit 1
     rm -f ${signed}
     unset signed
-    echo "  - $ota"
     echo "$bd[ Finalizing... ]$rz"
     # updater-script
     echo "  updater-script"
