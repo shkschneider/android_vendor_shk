@@ -43,4 +43,6 @@ PRODUCT_RESTRICT_VENDOR_FILES := false
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
 
+TARGET_NO_RECOVERY := true
+
 # EOF
