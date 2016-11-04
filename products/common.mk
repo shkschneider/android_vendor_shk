@@ -18,7 +18,7 @@ PRODUCT_NAME ?= shkmod
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=16.11.00 \
+	ro.mod.version=16.11.04 \
 	persist.adb.notify=0
 ifeq ($(TARGET_BUILD_VARIANT),user)
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -42,8 +42,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_RESTRICT_VENDOR_FILES := false
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
-
-TARGET_NO_RECOVERY := true
 
 ifneq ($(TARGET_BUILD_VARIANT),eng)
 $(call inherit-product-if-exists, vendor/google/google.mk)
