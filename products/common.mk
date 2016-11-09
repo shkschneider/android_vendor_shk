@@ -18,7 +18,7 @@ PRODUCT_NAME ?= shkmod
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.mod.name=ShkMod \
-	ro.mod.version=16.11.04 \
+	ro.mod.version=16.11.09 \
 	persist.adb.notify=0
 ifeq ($(TARGET_BUILD_VARIANT),user)
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -26,13 +26,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
 endif
 
 PRODUCT_PACKAGES += \
+	org.fdroid.fdroid
 
 ifneq ("$(wildcard vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip)","")
 PRODUCT_COPY_FILES += \
-        vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
+	vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
 else
 PRODUCT_COPY_FILES += \
-        vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
+	vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
 endif
 
 PRODUCT_COPY_FILES += \
