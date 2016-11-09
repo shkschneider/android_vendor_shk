@@ -138,6 +138,7 @@ buildprop="system/build.prop"
 signed="signed-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 ota="ota-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 rom="rom-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
+stock="stock-${modName}-${modVersion}-${device}-android-${androidVersion}-${androidBuildId}.zip"
 ccache="./prebuilts/misc/$(uname -s | tr "[A-Z]" "[a-z]")-x86/ccache/ccache"
 if [[ -f "$ccache" ]] && [[ -x "$ccache" ]] ; then
     echo "  ccache"
@@ -281,13 +282,13 @@ else
     unset ota
     [ ! -f "$rom" ] && echo "$ko[ $rom ]$rz" && exit 1
     echo "$bd$ok[ $rom $(md5sum "$rom" | awk '{print $1}') ]$rz"
-    unset dist rom
-    # gapps
-    echo "  http://opengapps.org"
-    # fdroid (seSuperuser, AdAway)
-    echo "  http://f-droid.org"
-    # root (seSuperuser)
-    echo "  http://superuser.phh.me/superuser.zip"
+    unset rom
+    factory="$dist/${TARGET_PRODUCT}-img-eng.${id}.zip"
+    if [ -f "$factory" ] ; then
+        mv ${factory} ${stock}
+        echo "$bd[ $stock $(md5sum "$stock" | awk '{print $1}') ]$rz"
+    fi
+    unset dist factory stock
 fi
 
 # done
