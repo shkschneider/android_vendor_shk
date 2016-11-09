@@ -155,7 +155,6 @@ ulimit -S -n 1024 || echo "$wn[ ulimit ]$rz" >&2
 out=$(echo "$ANDROID_PRODUCT_OUT" | sed -r "s;^$(pwd)/;;")
 
 # cleaning
-[ "$androidBuildVariant" != "eng" ] && clean=1
 echo "$bd[ Cleaning... ]$rz"
 [ -d "META-INF" ] && rm -rf META-INF
 [ -d "$buildprop" ] && rm -f ${buildprop}
@@ -164,9 +163,9 @@ echo "  *.zip"
 [ -f "$ota" ] && rm -f ${ota}
 [ -f "$rom" ] && rm -f ${rom}
 [ -f "$stock" ] && rm -f ${stock}
-echo "  *.img"
-rm -f "$out/*.img" 2>/dev/null
 if [ $clean -eq 1 ] ; then
+    echo "  *.img"
+    rm -f "$out/*.img" 2>/dev/null
     echo "  make installclean"
     make -j$j installclean >/dev/null \
         || { echo "$ko[ make installclean ]$rz" >&2 && exit 1 ; }
