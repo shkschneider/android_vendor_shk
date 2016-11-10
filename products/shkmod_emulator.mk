@@ -24,10 +24,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.secure=0 \
 	ro.debuggable=1 \
 	ro.adb.secure=0
-
-ifeq ($(TARGET_BUILD_VARIANT),eng)
-PRODUCT_PACKAGES += \
-	Music
-endif
+PRODUCT_PROPERTY_OVERRIDES += \
+	ro.sf.lcd_density=326
 
 # EOF
