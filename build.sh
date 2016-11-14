@@ -32,15 +32,18 @@ command -v zip >/dev/null 2>&1 || { echo "$ko[ zip ]$rz" >&2 && exit 1 ; }
 id=$(egrep '^\s*PRODUCT_NAME' "vendor/shk/products/common.mk" 2>/dev/null | cut -d'#' -f1 | awk '{print $NF}')
 id=${id:-"shkmod"}
 [[ ! $id =~ ^[a-zA-Z0-9]+$ ]] && echo "$ko[ id ]$rz" >&2 && exit 1
+
 # jobs
 j="$(grep 'cpu cores' /proc/cpuinfo uniq 2>/dev/null | uniq | awk '{print $NF}')"
 [[ ! $j =~ ^[0-9]+$ ]] && j="2"
 
 # general checks
-[ ! -d ".repo" ] && echo "$ko[ .repo ]$rz" >&2 && exit 1
-[ ! -f ".repo/manifests/default.xml" ] && echo "$ko[ .repo/manifests/default.xml ]$rz" >&2 && exit 1
-[ ! -f ".repo/local_manifests/roomservice.xml" ] && echo "$ko[ .repo/local_manifests/roomservice.xml ]$rz" >&2 && exit 1
-[ ! -f "build/envsetup.sh" ] && echo "$ko[ build/envsetup.sh ]$rz" >&2 && exit 1
+[ -d ".repo" ] || { echo "$ko[ .repo ]$rz" >&2 && exit 1 ; }
+[ -d ".repo/manifests" ] || { echo "$ko[ .repo/manifests ]$rz" >&2 && exit 1 ; }
+[ -f ".repo/manifests/default.xml" ] || { echo "$ko[ .repo/manifests/default.xml ]$rz" >&2 && exit 1 ; }
+[ -d ".repo/local_manifests" ] || { echo "$ko[ .repo/local_manifests ]$rz" >&2 && exit 1 ; }
+[ -f ".repo/local_manifests/roomservice.xml" ] || { echo "$ko[ .repo/local_manifests/roomservice.xml ]$rz" >&2 && exit 1 ; }
+[ -f "build/envsetup.sh" ] || { echo "$ko[ build/envsetup.sh ]$rz" >&2 && exit 1 ; }
 source build/envsetup.sh >/dev/null \
     || { echo "$ko[ source build/envsetup.sh ]$rz" >&2 && exit 1 ; }
 croot \
