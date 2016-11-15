@@ -244,6 +244,7 @@ else
     [ -d META-INF ] && { echo "$wn[ META-INF ]$rz" >&2 && exit 1 ; }
     mkdir -p $(dirname ${updaterscript}) >/dev/null
     rm -f ${updaterscript}
+    echo "ui_print(\"  _________.__     __      _____             .___\");" >> ${updaterscript}
     echo "ui_print(\" /   _____/|  |__ |  | __ /     \\   ____   __| _/\");" >> ${updaterscript}
     echo "ui_print(\" \\_____  \\ |  |  \\|  |/ //  \\ /  \\ /  _ \\ / __ | \");" >> ${updaterscript}
     echo "ui_print(\" /        \\|   Y  \\    </    Y    (  <_> ) /_/ | \");" >> ${updaterscript}
