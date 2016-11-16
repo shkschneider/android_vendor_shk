@@ -34,9 +34,6 @@ endif
 
 PRODUCT_RESTRICT_VENDOR_FILES := false
 
-PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg
-PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
-
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
 
 ifneq ($(TARGET_BUILD_VARIANT),eng)
