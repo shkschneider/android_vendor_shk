@@ -94,13 +94,13 @@ if [ -z "$TARGET_PRODUCT$TARGET_BUILD_VARIANT" -o "$TARGET_PRODUCT-$TARGET_BUILD
 fi
 
 # summary
-modName=$(egrep "^\s*ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1 | sort -n | tail -1)
+modName=$(egrep "^PRODUCT_PROPERTY_OVERRIDES\s+\+=\s+ro.mod.name=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f3 | sort -n | tail -1)
 [[ ! $modName =~ ^[a-zA-Z]+$ ]] && echo "$ko[ modName ]$rz" >&2 && exit 1
-modVersion=$(egrep "^\s*ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f2 | cut -d' ' -f1 | sort -n | tail -1)
+modVersion=$(egrep "^^PRODUCT_PROPERTY_OVERRIDES\s+\+=\s+ro.mod.version=" vendor/shk/products/common.mk 2>/dev/null | cut -d'=' -f3 | sort -n | tail -1)
 [[ ! $modVersion =~ ^[0-9]+(\.[0-9]+)*$ ]] && echo "$ko[ modVersion ]$rz" >&2 && exit 1
 echo "$bd[ $modName $modVersion ]$rz"
 modName=$(echo "$modName" | tr '[A-Z]' '[a-z]')
-androidRevision=$(egrep 'default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's;refs/tags/;;' | head -1)
+androidRevision=$(egrep '^\s+<default\s+revision' .repo/manifests/default.xml 2>/dev/null | cut -d'"' -f2 | sed 's;refs/tags/;;' | tail -1)
 [[ ! $androidRevision =~ ^android-[0-9\.]+(w?_r[0-9]+)?$ ]] && echo "$ko[ androidRevision ]$rz" >&2 && exit 1
 androidVersion=$(egrep "^\s*PLATFORM_VERSION :=" build/core/version_defaults.mk 2>/dev/null | awk '{print $NF}' | sort -n | tail -1)
 [[ ! $androidVersion =~ ^[0-9]+(\.[0-9]+)*$ ]] && echo "$ko[ androidVersion ]$rz" >&2 && exit 1

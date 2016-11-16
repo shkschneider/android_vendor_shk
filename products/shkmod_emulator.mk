@@ -20,11 +20,10 @@ $(call inherit-product, vendor/shk/products/common.mk)
 PRODUCT_NAME := shkmod_emulator
 PRODUCT_MODEL := Emulator
 
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.secure=0 \
-	ro.debuggable=1 \
-	ro.adb.secure=0
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.sf.lcd_density=326
+PRODUCT_PROPERTY_OVERRIDES += ro.secure=0
+PRODUCT_PROPERTY_OVERRIDES += ro.debuggable=1
+PRODUCT_PROPERTY_OVERRIDES += ro.adb.secure=0
+
+PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcd_density=326
 
 # EOF

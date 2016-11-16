@@ -16,31 +16,26 @@
 
 PRODUCT_NAME ?= shkmod
 
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.mod.name=ShkMod \
-	ro.mod.version=16.11.15 \
-	persist.adb.notify=0
+PRODUCT_PROPERTY_OVERRIDES += ro.mod.name=ShkMod
+PRODUCT_PROPERTY_OVERRIDES += ro.mod.version=16.11.15
+PRODUCT_PROPERTY_OVERRIDES += persist.adb.notify=0
+
 ifeq ($(TARGET_BUILD_VARIANT),user)
-PRODUCT_PROPERTY_OVERRIDES += \
-	ro.adb.secure=1
+PRODUCT_PROPERTY_OVERRIDES += ro.adb.secure=1
 endif
 
-PRODUCT_PACKAGES += \
-	org.fdroid.fdroid
+PRODUCT_PACKAGES += org.fdroid.fdroid
 
 ifneq ("$(wildcard vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip)","")
-PRODUCT_COPY_FILES += \
-	vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
+PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/bootanimation/$(PRODUCT_DEVICE).zip:system/media/bootanimation.zip
 else
-PRODUCT_COPY_FILES += \
-	vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
+PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
 endif
 
-PRODUCT_COPY_FILES += \
-	vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg \
-	vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
-
 PRODUCT_RESTRICT_VENDOR_FILES := false
+
+PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/audio/ringtones/Enter_the_Nexus.ogg:system/media/audio/ringtones/Enter_the_Nexus.ogg
+PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/media/audio/notifications/Teleport.ogg:system/media/audio/notifications/Teleport.ogg
 
 PRODUCT_PACKAGE_OVERLAYS += vendor/shk/overlay
 
