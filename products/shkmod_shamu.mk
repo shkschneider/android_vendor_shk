@@ -26,7 +26,4 @@ PRODUCT_RESTRICT_VENDOR_FILES := false
 
 PRODUCT_PROPERTY_OVERRIDES += qemu.sf.lcd_density=493
 
-PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/vendor/media/LMspeed_508.emd:system/vendor/media/LMspeed_508.emd
-PRODUCT_COPY_FILES += vendor/shk/prebuilt/system/vendor/media/PFFprec_600.emd:system/vendor/media/PFFprec_600.emd
-
 # EOF
