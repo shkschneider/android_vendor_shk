@@ -130,6 +130,7 @@ while read manifest ; do
             cd - >/dev/null && continue
         fi
         # continue
+        commit="$(git rev-parse HEAD)"
         echo "    checkout $commit"
         git checkout "$commit" >/dev/null 2>&1
         unset commit
